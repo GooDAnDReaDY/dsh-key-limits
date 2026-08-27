@@ -1,7 +1,6 @@
-# @goodandready/dsh-key-limits — bundle layer
-# Install: dsh plugin --profile web add file:/mnt/external/Project/DEV/dsh-key-limits
+# Private package bundle layer. Install only the published package.
 #
 - insert:
     - id: dsh-key-limits
-      name: '@goodandready/dsh-key-limits'
+      name: '@goodandready-private/dsh-key-limits'
       config: {}

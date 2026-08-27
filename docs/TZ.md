@@ -1,13 +1,13 @@
 # dsh-key-limits — ТЗ
 
-**Статус:** draft, ждёт approve перед кодом  
-**Дата:** 2026-08-27  
-**Пакет:** `@goodandready/dsh-key-limits`  
+**Статус:** private-route migration
+**Дата:** 2026-08-27
+**Пакет:** `@goodandready-private/dsh-key-limits`
 **Замена:** `@goodandready/dsh-spendmeter` (deprecate → remove со staging)
 
 ## 1. Цель
 
-Плагин DSH web только для **лимитов/квот по ключам (подпискам)**.  
+Плагин DSH web только для **лимитов/квот по ключам (подпискам)**.
 Никакого учёта spend, ledger, тарифов, графиков, сессий, CSV.
 
 ## 2. Пользовательские поверхности
@@ -102,7 +102,8 @@ ui: {
 3. Float chip drag + клик → все подписки с лимитами.
 4. Settings: add key → refresh → видно окна квот; delete работает.
 5. `dsh-spendmeter` снят с profile web после cutover.
-6. Smoke: remove/add file: + restart + health + journal clean.
+6. Smoke: temporary package artifact on the isolated test server; health,
+   routes, client bundle, functional scenarios, and cleanup are clean.
 7. Тёмная и светлая тема: карточка не ломается.
 
 ## 8. Риски
