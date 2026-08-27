@@ -1,0 +1,5 @@
+# @goodandready/dsh-key-limits — cordis patch
+id: "@goodandready/dsh-key-limits"
+about:
+  description: API key / subscription quota limits
+  config: {}
