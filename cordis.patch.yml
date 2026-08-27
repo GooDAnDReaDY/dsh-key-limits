@@ -1,5 +1,7 @@
-# @goodandready/dsh-key-limits — cordis patch
-id: "@goodandready/dsh-key-limits"
-about:
-  description: API key / subscription quota limits
-  config: {}
+# @goodandready/dsh-key-limits — bundle layer
+# Install: dsh plugin --profile web add file:/mnt/external/Project/DEV/dsh-key-limits
+#
+- insert:
+    - id: dsh-key-limits
+      name: '@goodandready/dsh-key-limits'
+      config: {}
