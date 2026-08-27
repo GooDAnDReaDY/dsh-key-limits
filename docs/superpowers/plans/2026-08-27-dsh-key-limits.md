@@ -2,15 +2,15 @@
 
 > **For agentic workers:** implement task-by-task after TZ approve. Checkboxes for tracking.
 
-**Goal:** New DSH plugin `@goodandready/dsh-key-limits` that only shows API-key/subscription quotas via float chip (all), composer-bar button (active one), and settings CRUD.
+**Goal:** New DSH plugin `@goodandready-private/dsh-key-limits` that only shows API-key/subscription quotas via float chip (all), composer-bar button (active one), and settings CRUD.
 
 **Architecture:** Greenfield package. Host = credentials store + provider quota fetchers + tiny HTTP API. Client = three surfaces, no ledger. Port quota code from `dsh-spendmeter` `lib/subs.js`; leave spend/ledger behind. Cut over staging by removing spendmeter.
 
-**Tech Stack:** DSH plugin (cordis), Schemastery Config, React client via ModuleLoader, Gitea `goodandready/dsh-key-limits`, deploy `file:/mnt/external/Project/DEV/dsh-key-limits`, profile `web`.
+**Tech Stack:** DSH plugin (cordis), Schemastery Config, React client via ModuleLoader, Gitea goodandready/dsh-key-limits, private GitHub Packages, profile web.
 
 ## Global Constraints
 
-- Package name `@goodandready/dsh-key-limits`, settings NS `dsh-key-limits`, HTTP `/dsh-key-limits`
+- Package name `@goodandready-private/dsh-key-limits`, settings NS `dsh-key-limits`, HTTP `/dsh-key-limits`
 - git via `git-cursor`; remote Gitea; no scp overlays into dsh share
 - Client source in `src/client/`, build to `lib/client.js`
 - Schemastery: no `.optional()` on numbers — use `.default(...)`
@@ -52,9 +52,9 @@ dsh-key-limits/
 
 ### Task 1: Scaffold repo + empty plugin loads
 
-**Deliverable:** Package on Gitea + DEV path; `dsh plugin add file:…` loads without error; `/dsh-key-limits/health` OK.
+**Deliverable:** Package on Gitea and published private registry route; the health route returns OK.
 
-- [ ] Create `/mnt/external/Project/DEV/dsh-key-limits`, `git-cursor init`, Gitea repo `goodandready/dsh-key-limits`
+- [ ] Use the canonical DEV project, Gitea repo goodandready/dsh-key-limits
 - [ ] `package.json` (name, version `0.1.0`, dsh.client.inject: runtime/locale/ui-slots)
 - [ ] Minimal `lib/index.js`: Config, settings.register(NS), health route
 - [ ] Minimal `lib/client.js` / `src/client`: `apply` no-op + inject slots/locale
@@ -102,7 +102,7 @@ dsh-key-limits/
 
 **Deliverable:** Spendmeter removed from web profile; only key-limits on staging; docs + issue closed.
 
-- [ ] README + CHANGELOG; smoke/deploy scripts (file: only)
+- [ ] README + CHANGELOG; package-artifact smoke checks
 - [ ] Full smoke on `dsh-key-limits`
 - [ ] `dsh plugin remove @goodandready/dsh-spendmeter`; restart; verify no spendmeter routes
 - [ ] Gitea: note on spendmeter README «superseded by dsh-key-limits»; optional archive issue
