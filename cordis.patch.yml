@@ -1,5 +1,4 @@
-# Private package bundle layer. Install only the published package.
-#
+# @goodandready-private/dsh-key-limits — bundle layer
 - insert:
     - id: dsh-key-limits
       name: '@goodandready-private/dsh-key-limits'

@@ -1,5 +1,5 @@
 {
-  "name": "@goodandready/dsh-key-limits",
+  "name": "@goodandready-private/dsh-key-limits",
   "version": "0.1.1",
   "description": "DeepSeek Harness plugin: API key / subscription quota limits (float chip, composer bar, settings).",
   "type": "module",
@@ -42,12 +42,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+ssh://gitea-codex:goodandready/dsh-key-limits.git"
+    "url": "git+https://github.com/goodandready-private/dsh-key-limits.git"
   },
   "bugs": {
-    "url": "http://192.168.1.111:3005/goodandready/dsh-key-limits/issues"
+    "url": "https://github.com/goodandready-private/dsh-key-limits/issues"
   },
-  "homepage": "http://192.168.1.111:3005/goodandready/dsh-key-limits",
+  "homepage": "https://github.com/goodandready-private/dsh-key-limits#readme",
   "engines": {
     "node": ">=20"
   },
@@ -56,8 +56,7 @@
     "@deepseek-ai/schemastery": "^3.18.1"
   },
   "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org/"
+    "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
     "build:client": "node scripts/build-client.mjs",
