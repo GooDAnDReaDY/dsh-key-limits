@@ -3,7 +3,7 @@ function apply(ctx){
   klCtx=ctx;
   registerKeyLimitsSettings(ctx);
   ctx.slots.inject("conversation.composer.bar",function(){
-    return ctx.slots.register({name:"conversation.composer.bar",id:"key-limits-active",priority:10},ActiveKeyButton);
+    return ctx.slots.register({name:"conversation.composer.bar",id:"key-limits-active",priority:10},ActiveKeyBound);
   });
   ctx.effect(function(){
     var el=document.createElement("div");el.id="dsh-key-limits-root";document.body.appendChild(el);

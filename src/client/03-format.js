@@ -1,6 +1,6 @@
 /* format */
-function sid(props){return props&&(props.sessionId||(props.session&&props.session.id)||(props.ctx&&props.ctx.session&&props.ctx.session.id))||""}
-function sessionIdFromCtx(){try{if(klCtx&&klCtx.sessions&&klCtx.sessions.active){var a=klCtx.sessions.active;return a.id||a||""}}catch(e){}return""}
+function sid(p){return p&&(p.sessionId||(p.session&&(p.session.sessionId||p.session.id)))||""}
+function sessionIdFromCtx(){try{var s=klCtx&&klCtx.sessions&&klCtx.sessions.list&&klCtx.sessions.list.getSnapshot();return s&&s.current||""}catch(e){return ""}}
 function fmtPct(n){var x=Number(n);return Number.isFinite(x)?Math.round(x)+"%":"—"}
 function fmtReset(resetsAt){if(!resetsAt)return"";var t=Date.parse(resetsAt);if(!Number.isFinite(t))return"";var ms=t-Date.now();if(ms<=0)return klT("refresh");var h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000);return (h?h+"h ":"")+m+"m"}
 function minRemaining(wins){if(!wins||!wins.length)return null;var m=null;for(var i=0;i<wins.length;i++){var r=Number(wins[i].remainingPercent);if(!Number.isFinite(r))continue;if(m===null||r<m)m=r}return m}
