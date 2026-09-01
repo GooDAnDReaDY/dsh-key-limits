@@ -26,20 +26,25 @@ function ActiveKeyButton(props){
     return jsx("button",{type:"button",className:"kl-chip kl-muted",title:klT("activeNoSession"),children:klT("activeNone")});
   }
   if(!data||!data.subId){
-    // visible placeholder — click still useful once keys matched; show em-dash not disabled hide
     return jsx("button",{type:"button",className:"kl-chip kl-muted",title:(data&&data.error)||klT("activeNone"),children:klT("activeNone")});
   }
   var wins=(data.quota&&data.quota.windows)||[],rem=minRemaining(wins);
   if(data.balance){
     var label=data.balance.cnyRemaining!=null?("¥"+Number(data.balance.cnyRemaining).toFixed(0)):(data.balance.remaining!=null?String(Math.round(Number(data.balance.remaining))):klT("balance"));
     return jsxs(React.Fragment,{children:[
-      jsx("button",{type:"button",className:"kl-chip kl-ok",title:(data.sub&&data.sub.label)||"",onClick:openModal,children:label}),
+      jsxs("button",{type:"button",className:"kl-chip kl-ok",title:(data.sub&&data.sub.label)||"",onClick:openModal,children:[
+        jsx(SvgKey,{size:11}),
+        jsx("span",{children:label})
+      ]}),
       open?jsx(OneLimitModal,{data:data,onClose:closeModal}):null
     ]});
   }
   var cls="kl-chip "+pctClass(rem)+(data.quota&&data.quota.stale?" kl-stale":"");
   return jsxs(React.Fragment,{children:[
-    jsx("button",{type:"button",className:cls,title:(data.sub&&data.sub.label)||providerLabel(data.sub&&data.sub.provider),onClick:openModal,children:rem!=null?fmtPct(rem):"—"}),
+    jsxs("button",{type:"button",className:cls,title:(data.sub&&data.sub.label)||providerLabel(data.sub&&data.sub.provider),onClick:openModal,children:[
+      jsx(SvgKey,{size:11}),
+      jsx("span",{children:rem!=null?fmtPct(rem):"—"})
+    ]}),
     open?jsx(OneLimitModal,{data:data,onClose:closeModal}):null
   ]});
 }
