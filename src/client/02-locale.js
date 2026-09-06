@@ -1,5 +1,7 @@
 /* locale */
 var KL_en={
+  storageDir:"Storage directory",refreshHours:"Refresh hours",floatChip:"Float chip",composerBar:"Composer bar",saved:"Saved",
+
   title:"Key Limits",subtitle:"API keys and subscription quotas",
   loading:"Loading…",close:"Close",cancel:"Cancel",save:"Save",add:"Add",
   refresh:"Refresh",refreshAll:"Refresh all",refreshing:"Refreshing…",
@@ -20,6 +22,8 @@ var KL_en={
   pickDash:"— choose —"
 };
 var KL_ru={
+  storageDir:"Каталог данных",refreshHours:"Часы обновления",floatChip:"Float chip",composerBar:"Полоса composer",saved:"Сохранено",
+
   title:"Лимиты ключей",subtitle:"API-ключи и квоты подписок",
   loading:"Загрузка…",close:"Закрыть",cancel:"Отмена",save:"Сохранить",add:"Добавить",
   refresh:"Обновить",refreshAll:"Обновить все",refreshing:"Обновление…",

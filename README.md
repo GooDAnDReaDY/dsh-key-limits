@@ -28,3 +28,10 @@ this plugin from a source directory or worktree.
     npm test
 
 Client source: src/client/ -> lib/client.js.
+
+## Changed in v0.1.6
+
+- #14: `settings.register` via `ctx.inject(['settings'])` (no `ctx.extend`).
+- #11: Settings → Plugins card only — removed `settings.section` fallback.
+- #13: Config fields (`storageDir` / `refreshHours` / `ui.*`) bound through `settingsScope`.
+- #12: subscription secrets stored via DSH credentials service; `subs.json` keeps `credentialRef` only.

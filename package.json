@@ -1,6 +1,6 @@
 {
   "name": "@goodandready-private/dsh-key-limits",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "DeepSeek Harness plugin: API key / subscription quota limits (float chip, composer bar, settings).",
   "type": "module",
   "main": "lib/index.js",
@@ -24,7 +24,9 @@
     "client": {
       "platform": "web",
       "inject": [
-        "@deepseek-ai/dsh-client-locale"
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-slots",
+        "@deepseek-ai/dsh-client-ui-settings"
       ]
     }
   },
