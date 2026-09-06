@@ -107,8 +107,67 @@ function KeysInlineList(){
   ]});
 }
 
+function ConfigFields(props){
+  var t = props.t || klT;
+  var ctx = props.ctx || klCtx;
+  var st = useState({ status: "loading", storageDir: "", refreshHours: 24, floatChip: true, composerBar: true, msg: "", saving: false });
+  var s = st[0], setSt = st[1];
+  var scopeRef = useRef(null);
+  if (!scopeRef.current && ctx && ctx.settingsScope && ctx.settingsScope.bind) {
+    try { scopeRef.current = ctx.settingsScope.bind({ namespace: "dsh-key-limits" }); } catch (e) { scopeRef.current = null; }
+  }
+  useEffect(function(){
+    var scope = scopeRef.current;
+    if (!scope) { setSt(function(x){ return Object.assign({}, x, { status: "unavailable" }); }); return; }
+    var cancelled = false;
+    Promise.resolve(scope.get()).then(function(snap){
+      if (cancelled) return;
+      if (snap && typeof snap === "object" && "status" in snap) {
+        if (snap.status === "loading") { setSt(function(x){ return Object.assign({}, x, { status: "loading" }); }); return; }
+        if (snap.status === "unavailable") { setSt(function(x){ return Object.assign({}, x, { status: "unavailable" }); }); return; }
+      }
+      var vals = (snap && snap.values) ? snap.values : snap;
+      var ui = (vals && vals.ui) || {};
+      setSt(function(x){ return Object.assign({}, x, {
+        status: "ready",
+        storageDir: (vals && vals.storageDir) || "",
+        refreshHours: (vals && vals.refreshHours) != null ? vals.refreshHours : 24,
+        floatChip: ui.floatChip !== false,
+        composerBar: ui.composerBar !== false,
+      }); });
+    }).catch(function(){ if (!cancelled) setSt(function(x){ return Object.assign({}, x, { status: "unavailable" }); }); });
+    return function(){ cancelled = true; };
+  }, [ctx]);
+  function save(){
+    var scope = scopeRef.current;
+    if (!scope) { setSt(function(x){ return Object.assign({}, x, { msg: "settingsScope unavailable" }); }); return; }
+    setSt(function(x){ return Object.assign({}, x, { saving: true, msg: "" }); });
+    var payload = {
+      storageDir: String(s.storageDir || ""),
+      refreshHours: Number(s.refreshHours) || 24,
+      ui: { floatChip: !!s.floatChip, composerBar: !!s.composerBar },
+    };
+    Promise.all(Object.keys(payload).map(function(k){ return scope.set(k, payload[k]); })).then(function(){
+      setSt(function(x){ return Object.assign({}, x, { saving: false, msg: t("saved") || "Saved" }); });
+    }).catch(function(e){
+      setSt(function(x){ return Object.assign({}, x, { saving: false, msg: String(e && e.message || e) }); });
+    });
+  }
+  if (s.status === "loading") return jsx("div",{className:"kl-meta",children:t("loading")});
+  if (s.status === "unavailable") return jsx("div",{className:"kl-meta",children:"settingsScope unavailable"});
+  return jsxs("div",{style:{marginBottom:16,paddingBottom:12,borderBottom:"1px solid var(--dsw-alias-border-l2, #333)"},children:[
+    jsxs("div",{className:"kl-field",children:[jsx("div",{className:"kl-fieldLabel",children:t("storageDir")}),jsx("input",{className:"kl-input",value:s.storageDir,onChange:function(e){setSt(function(x){return Object.assign({},x,{storageDir:e.target.value})})}})]}),
+    jsxs("div",{className:"kl-field",children:[jsx("div",{className:"kl-fieldLabel",children:t("refreshHours")}),jsx("input",{className:"kl-input",type:"number",value:s.refreshHours,onChange:function(e){setSt(function(x){return Object.assign({},x,{refreshHours:e.target.value})})}})]}),
+    jsxs("label",{className:"kl-meta",style:{display:"flex",gap:8,alignItems:"center"},children:[jsx("input",{type:"checkbox",checked:!!s.floatChip,onChange:function(e){setSt(function(x){return Object.assign({},x,{floatChip:e.target.checked})})}}), t("floatChip")]}),
+    jsxs("label",{className:"kl-meta",style:{display:"flex",gap:8,alignItems:"center"},children:[jsx("input",{type:"checkbox",checked:!!s.composerBar,onChange:function(e){setSt(function(x){return Object.assign({},x,{composerBar:e.target.checked})})}}), t("composerBar")]}),
+    s.msg?jsx("div",{className:"kl-meta",children:s.msg}):null,
+    jsx("div",{style:{marginTop:8},children:jsx("button",{type:"button",className:"kl-btn kl-btnPrimary",disabled:s.saving,onClick:save,children:s.saving?t("loading"):t("save")})})
+  ]});
+}
+
 function KeyLimitsPluginCard(props){
-  var lang = useActiveLocale(klCtx || (props && props.ctx)),
+  var ctx = (props && props.ctx) || klCtx;
+  var lang = useActiveLocale(ctx),
       dict = lang === "ru" ? KL_ru : KL_en,
       t = (typeof props.t === "function") ? props.t : makeT(dict, KL_en),
       st = useState(false),
@@ -122,7 +181,10 @@ function KeyLimitsPluginCard(props){
       ]}),
       jsx("span",{className:"kl-chev"+(open?" kl-chev-open":""),"aria-hidden":"true",children:jsx("svg",{width:14,height:14,viewBox:"0 0 14 14",fill:"none",stroke:"currentColor",strokeWidth:1.5,style:{display:"block"},children:jsx("path",{d:"M3.5 5.25L7 8.75L10.5 5.25"})})})
     ]}),
-    open?jsx("div",{className:"kl-body",children:jsx(KeysSettingsBody,{})}):null
+    open?jsxs("div",{className:"kl-body",children:[
+      jsx(ConfigFields,{ctx:ctx,t:t}),
+      jsx(KeysSettingsBody,{})
+    ]}):null
   ]});
 }
 
@@ -139,20 +201,10 @@ function registerKeyLimitsSettings(ctx){
     return function () { undo.forEach(function (off) { off() }) }
   }, "key-limits: locale");
   function loc(){return useActiveLocale(ctx)}
-  var placed=false;
+  // #11: plugin.item only — no settings.section fallback
   ctx.slots.inject("settings.plugin.item",function(){
-    placed=true;
     return ctx.slots.register({name:"settings.plugin.item",key:NS,locale:NS,inject:function(){return{ctx}}},function(p){
       return jsx(KeyLimitsPluginCard,{...p,locale:loc()});
     });
   });
-  var timer=setTimeout(function(){
-    if(placed)return;
-    ctx.slots.inject("settings.section",function(){
-      return ctx.slots.register({name:"settings.section",id:"key-limits-settings",order:48,label:function(){return makeT(loc()==="ru"?KL_ru:KL_en,KL_en)("title")}},function(){
-        return jsx(KeysSettingsBody,{});
-      });
-    });
-  },3000);
-  ctx.effect(function(){return function(){clearTimeout(timer)}},"key-limits: settings fallback");
 }

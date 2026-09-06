@@ -8,7 +8,7 @@ const srcDir = join(root, 'src/client')
 const order = readFileSync(join(srcDir, 'ORDER'), 'utf8').split(/\r?\n/).map(s => s.trim()).filter(Boolean)
 const PKG = '@goodandready-private/dsh-key-limits'
 const header = `window.__ModuleLoader__.load({id:"${PKG}",factory:(require)=>{`
-const footer = `exports.apply=apply;exports.inject=["slots","sessions","locale"];return module.exports}})`
+const footer = `exports.apply=apply;exports.inject=["slots","sessions","locale","settingsScope"];return module.exports}})`
 let body = ''
 for (const file of order) {
   const text = readFileSync(join(srcDir, file), 'utf8')
