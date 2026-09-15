@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.8
+
+- **Provider Support**:
+  - Added Command Code (`commandcode`) provider: fetches quota windows (5h, weekly) from `https://api.commandcode.ai/alpha/billing/credits`.
+  - Bound `COMMANDCODE_API_KEY` in `credentialRefs`.
+- **Loader Resilience**:
+  - Made `loadSubs` robust: loads union of IDs from both `credentials` and `meta`, ensuring cards remain visible even when credentials are stored via external refs.
+- **Tests**:
+  - Added unit test suite for Command Code provider registration, schema, and loader resilience.
+
 ## 0.1.7
 
 - **Resilience & Storage**:
