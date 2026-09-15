@@ -1,6 +1,9 @@
 /* apply */
 function apply(ctx){
   klCtx=ctx;
+  ctx.effect(function(){
+    return ensureKeyLimitsStyles();
+  },"key-limits: style mount");
   registerKeyLimitsSettings(ctx);
   ctx.slots.inject("conversation.composer.bar",function(){
     return ctx.slots.register({name:"conversation.composer.bar",id:"key-limits-active",priority:10},ActiveKeyBound);

@@ -60,6 +60,7 @@ function OneLimitModal(props){
   if (!d) return null;
   var sub = d.sub || {}, wins = (d.quota && d.quota.windows) || [], title = providerLabel(sub.provider || (d.route && d.route.provider)), subline = (sub.label || "").trim();
   return jsx(PortalModal, {
+    onClose: onClose,
     children: jsx("div", {
       className: "kl-overlay",
       onClick: onClose,
@@ -246,6 +247,7 @@ function AllLimitsModal(props){
   });
 
   return jsx(PortalModal, {
+    onClose: onClose,
     children: jsx("div", {
       className: "kl-overlay",
       onClick: onClose,

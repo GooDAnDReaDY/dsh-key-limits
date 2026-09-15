@@ -24,7 +24,7 @@ function AddKeyModal(props){
       onSaved&&onSaved();onClose&&onClose();
     }).catch(function(e){setSt(function(x){return Object.assign({},x,{saving:false,err:String(e&&e.message||e)||klT("saveError")})})});
   }
-  return jsx(PortalModal,{children:jsx("div",{className:"kl-overlay",onClick:onClose,children:
+  return jsx(PortalModal,{onClose:onClose,children:jsx("div",{className:"kl-overlay",onClick:onClose,children:
     jsxs("div",{className:"kl-panel",onClick:function(e){e.stopPropagation()},children:[
       jsxs("div",{className:"kl-panelHead",children:[
         jsxs("div",{children:[

@@ -23,3 +23,8 @@ test('package metadata points to the private GitHub repository', () => {
   assert.ok(pkg.homepage.includes(expected))
   assert.ok(pkg.bugs.url.includes(expected))
 })
+
+test('client styles use data-dsh-plugin attribute for isolation', () => {
+  assert.ok(read('lib/client.js').includes('data-dsh-plugin="dsh-key-limits"'))
+})
+

@@ -4,7 +4,7 @@ function sessionIdFromCtx(){try{var s=klCtx&&klCtx.sessions&&klCtx.sessions.list
 function fmtPct(n){var x=Number(n);return Number.isFinite(x)?Math.round(x)+"%":"—"}
 function fmtReset(resetsAt){
   if(!resetsAt)return"";
-  var t=Date.parse(resetsAt);
+  var t=typeof resetsAt==="number"?resetsAt:Date.parse(resetsAt);
   if(!Number.isFinite(t))return"";
   var ms=t-Date.now();
   if(ms<=0)return klT("refresh");
@@ -17,7 +17,15 @@ function floatPctClass(rem){if(rem==null)return"kl-float-muted";if(rem<=DANGER)r
 function progBarClass(rem){var b="kl-progBar";if(rem<=DANGER)b+=" kl-progDanger";else if(rem<=WARN)b+=" kl-progWarn";return b}
 function readPos(){try{var r=JSON.parse(localStorage.getItem(POS_KEY)||"null");if(r&&typeof r.x==="number"&&typeof r.y==="number")return r}catch(e){}return null}
 function savePos(x,y){try{localStorage.setItem(POS_KEY,JSON.stringify({x:x,y:y}))}catch(e){}}
-function PortalModal(props){return createPortal(props.children,document.body)}
+function PortalModal(props){
+  useEffect(function(){
+    if(typeof window==="undefined"||!props.onClose)return;
+    function onKey(e){if(e.key==="Escape")props.onClose()}
+    window.addEventListener("keydown",onKey);
+    return function(){window.removeEventListener("keydown",onKey)};
+  },[props.onClose]);
+  return createPortal(props.children,document.body);
+}
 function providerLabel(p){return p||"?"}
 function providerClass(p){
   var s=String(p||"").toLowerCase();

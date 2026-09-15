@@ -530,9 +530,15 @@ var css = `
 
 `;
 
-if(typeof document!=="undefined"&&!document.querySelector("[data-kl-css]")){
+function ensureKeyLimitsStyles(){
+  if(typeof document==="undefined")return function(){};
+  var existing=document.querySelector('style[data-dsh-plugin="dsh-key-limits"]');
+  if(existing)return function(){};
   var tag=document.createElement("style");
-  tag.setAttribute("data-kl-css","1");
+  tag.dataset.dshPlugin="dsh-key-limits";
+  tag.setAttribute("data-dsh-plugin","dsh-key-limits");
   tag.textContent=css;
   document.head.appendChild(tag);
+  return function(){tag.remove()};
 }
+ensureKeyLimitsStyles();
