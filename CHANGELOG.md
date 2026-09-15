@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.10
+
+- **Public Package Transition**:
+  - Rebranded package scope to `@goodandready/dsh-key-limits` for canonical public release.
+  - Aligned package repository URLs to `GooDAnDReaDY/dsh-key-limits`.
+  - Configured public npm registry (`https://registry.npmjs.org`) in updater and manifest.
+  - Synchronized client loader entry and Cordis patch definitions.
+- **Documentation Standard**:
+  - Added full multi-language hero headers with official showcase badges, GitHub star/issue tables, and Mermaid architecture diagrams across `README.md`, `README.zh.md`, and `README.ru.md`.
+  - Comprehensive provider reference table including Command Code rolling, weekly, and monthly quotas.
+  - Updated configuration guide with `activeOnTop` and `order` options.
+
 ## 0.1.9
 
 - **UI Polish & Spacing**:

@@ -1,5 +1,5 @@
-# @goodandready-private/dsh-key-limits — bundle layer
+# @goodandready/dsh-key-limits — bundle layer
 - insert:
     - id: dsh-key-limits
-      name: '@goodandready-private/dsh-key-limits'
+      name: '@goodandready/dsh-key-limits'
       config: {}
