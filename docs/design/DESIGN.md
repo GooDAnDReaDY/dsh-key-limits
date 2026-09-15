@@ -1,4 +1,4 @@
-# DESIGN.md — @goodandready-private/dsh-key-limits
+# DESIGN.md — @goodandready/dsh-key-limits
 
 Дизайн-контракт пользовательского опыта, интерфейса и визуальных решений плагина лимитов API-ключей и подписок DeepSeek Harness (DSH).
 
@@ -6,8 +6,8 @@
 
 ## Product / Purpose
 - **Назначение:** Мониторинг квот и балансов подписок/API-ключей без избыточного функционала (никаких графиков, тарифов, учёта расходов или ledger).
-- **Аудитория:** Пользователи и администраторы DSH, использующие внешние AI-провайдеры (OpenCode GO, Qwen, Ollama, Kimi, Z.ai, MiniMax, Cline, DeepSeek, OpenRouter).
-- **Статус:** Активный DSH Web-плагин (Private package route `@goodandready-private/dsh-key-limits`).
+- **Аудитория:** Пользователи и администраторы DSH, использующие внешние AI-провайдеры (Command Code, OpenCode GO, Qwen, Ollama, Kimi, Z.ai, MiniMax, Cline, DeepSeek, OpenRouter).
+- **Статус:** Активный DSH Web-плагин (Public package `@goodandready/dsh-key-limits`).
 
 ---
 
@@ -15,8 +15,13 @@
 - **Web/UI:**
   - **Floating Chip (`FloatChip`):** Плавающий индикатор общего состояния всех подписок (наименьший оставшийся процент квоты либо количество активных ключей). Поддерживает свободный drag с сохранением позиции в `localStorage` (`kl-chip-pos`) и viewport boundary clamping. Клик открывает модальное окно всех лимитов (`AllLimitsModal`).
   - **Composer Bar Button (`ActiveKeyButton`):** Кнопка в панели ввода сообщений активной сессии (`conversation.composer.bar`, priority 10). Отображает оставшуюся квоту (%) или баланс ($/¥) подписки, привязанной к модели текущей сессии. Клик открывает детальную модалку активного ключа (`OneLimitModal`).
-  - **Settings Card (`KeyLimitsPluginCard`):** Стандартная сворачиваемая карточка плагина во вкладке «Настройки → Плагины» (слот `settings.plugin.item`). Содержит управление общими параметрами (`storageDir`, `refreshHours`, переключатели поверхностей) и управление списком ключей (добавление, ручной refresh, удаление).
-  - **All Limits Hub (`AllLimitsModal`):** Полноэкранное/центрированное модальное окно со сводкой всех ключей, фильтрацией по табам («Все», «Квоты», «Балансы») и индикацией критических порогов.
+  - **Settings Card (`KeyLimitsPluginCard`):** Стандартная сворачиваемая карточка плагина во вкладке «Настройки → Плагины» (слот `settings.plugin.item`). Содержит:
+    - Управление общими параметрами (`storageDir`, `refreshIntervalMs`).
+    - Опцию «Активный всегда сверху» (`activeOnTop: boolean`).
+    - Список ручной сортировки аккаунтов (`order: string[]`) с кнопками ▲ / ▼.
+    - Управление списком ключей (добавление, ручной refresh, удаление).
+    - Встроенный One-Click Updater с проверкой реестра npmjs.
+  - **All Limits Hub (`AllLimitsModal`):** Полноэкранное/центрированное модальное окно со сводкой всех ключей, фильтрацией по табам («Все», «Квоты», «Балансы») и отступом 12px между карточками (`.kl-list`).
   - **Active Limit Detail (`OneLimitModal`):** Компактная модалка с детальным разбором окон лимита активной сессии (Rolling 5h, Weekly, Monthly).
   - **Add Key Modal (`AddKeyModal`):** Форма добавления ключа/токена с динамическими полями провайдера.
 - **DSH UI / settings / slots:**
@@ -30,17 +35,24 @@
   - `POST /dsh-key-limits/subs` — создание/обновление подписки (секреты в DSH credentials).
   - `DELETE /dsh-key-limits/subs?id=` — удаление подписки.
   - `GET /dsh-key-limits/active-sub?sessionId=` — привязка сессии к ключу и квоте.
+  - `GET /dsh-key-limits/update` — статус обновлений из npmjs.
+  - `POST /dsh-key-limits/update` — запуск автообновления.
 - **CLI:** Отсутствует. Управление только через UI и штатный `dsh plugin --profile web add/remove`.
 - **Документация:**
   - `README.md` (English, канонический).
   - `README.zh.md` (Chinese, обязательный).
   - `README.ru.md` (Russian, зеркальный).
-  - `index.md`, `docs/design/DESIGN.md`, `docs/TZ.md`.
+  - `CHANGELOG.md`, `docs/design/DESIGN.md`.
 
 ---
 
 ## Visual Direction
-- **Атмосфера:** Премиальный утилитарный системный интерфейс. Гармоничное встраивание в нативный дизайн DSH (Dark/Light режимы ядра). Никакого тяжеловесного стороннего оформления.
+- **Атмосфера:** Премиальный утилитарный системный интерфейс. Гармоничное встраивание в нативный дизайн DSH (Dark/Light режимы ядра).
+- **Спокойная цветовая схема:** 
+  - Карточки подписок имеют вертикальный flex gap 12px.
+  - Здоровые остатки (>30%) выводятся в нейтральном цвете темы, без кричащей кислотно-зелёной заливки.
+  - Прогресс-бары: лаконичные полосы высотой 5px.
+  - Таймер сброса: читаемый человеческий формат (`X d Y h Z m` для >= 24ч, `Y h Z m` для < 24ч).
 - **Утверждённые референсы:** Нативные компоненты ядра DSH (`settings.plugin.item`, `dsw-alias-*` переменные, бейджи и кнопки ядра).
 - **Не копировать:** Интерфейсы сторонних дашбордов, неоморфизм, избыточные анимации, градиенты без семантики.
 
@@ -48,12 +60,12 @@
 
 ## Foundations
 - **Цвета и роли:**
-  - Фоны и границы: `var(--dsw-alias-bg-base)`, `var(--dsw-alias-bg-layer-3)`, `var(--dsw-alias-border-l2)`.
+  - Фоны и границы: `var(--dsw-alias-bg-base)`, `var(--dsw-alias-bg-layer-3)`, `rgba(255, 255, 255, 0.07)`.
   - Текст: `var(--dsw-alias-label-primary)`, `var(--dsw-alias-label-secondary)`, `var(--dsw-alias-label-tertiary)`.
   - Семантические цвета квот:
-    - Normal / Safe (> 30% remaining): `#10b981` (Emerald).
-    - Warning (15% .. 30% remaining): `#f59e0b` (Amber).
-    - Danger (< 15% remaining): `#ef4444` (Red).
+    - Normal / Safe (> 30% remaining): спокойный нейтральный цвет текста / акцентный изумруд `#34d399` для полосы.
+    - Warning (15% .. 30% remaining): `#fbbf24` (Amber).
+    - Danger (< 15% remaining): `#f87171` (Red).
     - Muted / Stale / No Route: `var(--dsw-alias-label-tertiary)`.
 - **Типографика:** Системный DSH стек шрифтов, tabular-nums для цифр процентов и балансов.
 - **Сетка, отступы, responsive:** Bento-сетка для окон квот (`.kl-bentoGrid`), карточка скругление 12px, модалка 24px, плавающий чип 999px pill.
