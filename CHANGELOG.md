@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.1.9
+
+- **UI Polish & Spacing**:
+  - Added 12px gap between subscription cards (`.kl-list`), resolving card overlap.
+  - Softened visual theme: calmer progress bars, subdued text contrast for healthy states, subtle bento cells and provider pills.
+  - Changed summary metric label to "Всего аккаунтов" (`totalAccounts`).
+- **Account Reordering & Pinned Active Sub**:
+  - Added "active account always on top" (`ui.activeOnTop`, enabled by default).
+  - Added custom account display ordering (`ui.order`) with Up/Down controls in settings.
+- **Humanized Reset Countdown**:
+  - `fmtReset` now shows days and hours (e.g. `5d 5h 19m`) for countdowns >= 24h, and only hours and minutes for < 24h.
+- **Command Code Monthly Quota**:
+  - Extended `fetchCommandCodeQuota` to query `/alpha/billing/subscriptions`, calculating monthly credit allowance and reset date into `tertiaryWindow`.
+
 ## 0.1.8
 
 - **Provider Support**:

@@ -7,14 +7,27 @@ function fmtReset(resetsAt) {
   if (!Number.isFinite(t)) return "";
   var ms = t - Date.now();
   if (ms <= 0) return "refresh";
-  var h = Math.floor(ms / 3600000), m = Math.floor((ms % 3600000) / 60000);
-  return (h ? h + "h " : "") + m + "m";
+  var totalMinutes = Math.floor(ms / 60000);
+  var totalHours = Math.floor(totalMinutes / 60);
+  var m = totalMinutes % 60;
+  if (totalHours < 24) {
+    return (totalHours ? totalHours + "h " : "") + m + "m";
+  }
+  var d = Math.floor(totalHours / 24);
+  var h = totalHours % 24;
+  return d + "d " + (h ? h + "h " : "") + m + "m";
 }
 
-test("fmtReset handles numeric millisecond timestamp", () => {
+test("fmtReset handles numeric millisecond timestamp under 24 hours", () => {
   const inTwoHours = Date.now() + 2 * 3600000 + 15 * 60000;
   const res = fmtReset(inTwoHours);
   assert.match(res, /^2h 1[45]m$/);
+});
+
+test("fmtReset handles countdowns greater than 24 hours with days and hours", () => {
+  const inFiveDays = Date.now() + (5 * 24 + 5) * 3600000 + 19 * 60000;
+  const res = fmtReset(inFiveDays);
+  assert.match(res, /^5d 5h 1[89]m$/);
 });
 
 test("fmtReset handles ISO date string", () => {
