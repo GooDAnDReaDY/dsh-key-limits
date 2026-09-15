@@ -8,11 +8,18 @@ function fmtReset(resetsAt){
   if(!Number.isFinite(t))return"";
   var ms=t-Date.now();
   if(ms<=0)return klT("refresh");
-  var h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000);
-  return (h?h+"h ":"")+m+"m";
+  var totalMinutes=Math.floor(ms/60000);
+  var totalHours=Math.floor(totalMinutes/60);
+  var m=totalMinutes%60;
+  if(totalHours<24){
+    return (totalHours?totalHours+"h ":"")+m+"m";
+  }
+  var d=Math.floor(totalHours/24);
+  var h=totalHours%24;
+  return d+"d "+(h?h+"h ":"")+m+"m";
 }
 function minRemaining(wins){if(!wins||!wins.length)return null;var m=null;for(var i=0;i<wins.length;i++){var r=Number(wins[i].remainingPercent);if(!Number.isFinite(r))continue;if(m===null||r<m)m=r}return m}
-function pctClass(rem){if(rem==null)return"kl-muted";if(rem<=DANGER)return"kl-danger";if(rem<=WARN)return"kl-warn";return"kl-ok"}
+function pctClass(rem){if(rem==null)return"kl-muted";if(rem<=DANGER)return"kl-danger";if(rem<=WARN)return"kl-warn";return"kl-normal"}
 function floatPctClass(rem){if(rem==null)return"kl-float-muted";if(rem<=DANGER)return"kl-float-danger";if(rem<=WARN)return"kl-float-warn";return"kl-float-ok"}
 function progBarClass(rem){var b="kl-progBar";if(rem<=DANGER)b+=" kl-progDanger";else if(rem<=WARN)b+=" kl-progWarn";return b}
 function readPos(){try{var r=JSON.parse(localStorage.getItem(POS_KEY)||"null");if(r&&typeof r.x==="number"&&typeof r.y==="number")return r}catch(e){}return null}
@@ -36,6 +43,7 @@ function providerClass(p){
   if(s.indexOf("cline")!==-1)return "kl-prov-cline";
   if(s.indexOf("qwen")!==-1)return "kl-prov-qwen";
   if(s.indexOf("ollama")!==-1)return "kl-prov-ollama";
+  if(s.indexOf("commandcode")!==-1)return "kl-prov-commandcode";
   return "";
 }
 

@@ -161,27 +161,35 @@ function AllLimitsModal(props){
   var load = useCallback(function(refresh){
     var q = refresh ? "?refresh=1" : "";
     if (refresh) setSt(function(s){ return Object.assign({}, s, { refreshing: true }); });
-    fetch(API + "/subs" + q, { cache: "no-store" })
-      .then(function(r){ return r.json(); })
-      .then(function(j){
-        setSt(function(s){
-          return Object.assign({}, s, {
-            loading: false,
-            subscriptions: j.subscriptions || [],
-            refreshing: !!j.refreshing,
-            err: ""
-          });
-        });
-      })
-      .catch(function(e){
-        setSt(function(s){
-          return Object.assign({}, s, {
-            loading: false,
-            refreshing: false,
-            err: String(e && e.message || e)
-          });
+    Promise.all([
+      fetch(API + "/config", { cache: "no-store" }).then(function(r){ return r.json(); }).catch(function(){ return {}; }),
+      fetch(API + "/subs" + q, { cache: "no-store" }).then(function(r){ return r.json(); }),
+      fetch(API + "/active-sub?sessionId=" + encodeURIComponent(sessionIdFromCtx()), { cache: "no-store" }).then(function(r){ return r.json(); }).catch(function(){ return null; })
+    ]).then(function(res){
+      var cfg = res[0] || {};
+      var j = res[1] || {};
+      var act = res[2] || {};
+      var ui = cfg.ui || {};
+      setSt(function(s){
+        return Object.assign({}, s, {
+          loading: false,
+          subscriptions: j.subscriptions || [],
+          refreshing: !!j.refreshing,
+          order: Array.isArray(ui.order) ? ui.order : [],
+          activeOnTop: ui.activeOnTop !== false,
+          activeSubId: (act && act.subId) || null,
+          err: ""
         });
       });
+    }).catch(function(e){
+      setSt(function(s){
+        return Object.assign({}, s, {
+          loading: false,
+          refreshing: false,
+          err: String(e && e.message || e)
+        });
+      });
+    });
   }, []);
 
   useEffect(function(){
@@ -246,6 +254,22 @@ function AllLimitsModal(props){
     return true;
   });
 
+  var sorted = filtered.slice();
+  var orderMap = {};
+  if (Array.isArray(state.order)) {
+    for (var oi = 0; oi < state.order.length; oi++) orderMap[state.order[oi]] = oi + 1;
+  }
+  sorted.sort(function(a, b){
+    if (state.activeOnTop && state.activeSubId) {
+      if (a.id === state.activeSubId) return -1;
+      if (b.id === state.activeSubId) return 1;
+    }
+    var pA = orderMap[a.id] || 9999;
+    var pB = orderMap[b.id] || 9999;
+    if (pA !== pB) return pA - pB;
+    return 0;
+  });
+
   return jsx(PortalModal, {
     onClose: onClose,
     children: jsx("div", {
@@ -282,7 +306,7 @@ function AllLimitsModal(props){
                   jsxs("div", {
                     className: "kl-statCard",
                     children: [
-                      jsx("div", { className: "kl-statLabel", children: "Всего ключей" }),
+                      jsx("div", { className: "kl-statLabel", children: klT("totalAccounts") || "Всего аккаунтов" }),
                       jsxs("div", {
                         className: "kl-statVal",
                         children: [
@@ -365,7 +389,7 @@ function AllLimitsModal(props){
 
               jsx("div", {
                 className: "kl-list",
-                children: filtered.map(function(s){
+                children: sorted.map(function(s){
                   return jsx(SubCard, {
                     key: s.id,
                     sub: s,

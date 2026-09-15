@@ -110,7 +110,18 @@ function KeysInlineList(){
 function ConfigFields(props){
   var t = props.t || klT;
   var ctx = props.ctx || klCtx;
-  var st = useState({ status: "loading", storageDir: "", refreshHours: 24, floatChip: true, composerBar: true, msg: "", saving: false });
+  var st = useState({
+    status: "loading",
+    storageDir: "",
+    refreshHours: 24,
+    floatChip: true,
+    composerBar: true,
+    activeOnTop: true,
+    order: [],
+    subsList: [],
+    msg: "",
+    saving: false
+  });
   var s = st[0], setSt = st[1];
   var scopeRef = useRef(null);
   if (!scopeRef.current && ctx && ctx.settingsScope && ctx.settingsScope.bind) {
@@ -120,24 +131,40 @@ function ConfigFields(props){
     var scope = scopeRef.current;
     if (!scope) { setSt(function(x){ return Object.assign({}, x, { status: "unavailable" }); }); return; }
     var cancelled = false;
-    Promise.resolve(scope.get()).then(function(snap){
+    Promise.all([
+      Promise.resolve(scope.get()),
+      fetch(API + "/subs", { cache: "no-store" }).then(function(r){ return r.json(); }).catch(function(){ return {}; })
+    ]).then(function(res){
       if (cancelled) return;
+      var snap = res[0];
+      var subsData = res[1] || {};
+      var subs = subsData.subscriptions || [];
       if (snap && typeof snap === "object" && "status" in snap) {
         if (snap.status === "loading") { setSt(function(x){ return Object.assign({}, x, { status: "loading" }); }); return; }
         if (snap.status === "unavailable") { setSt(function(x){ return Object.assign({}, x, { status: "unavailable" }); }); return; }
       }
       var vals = (snap && snap.values) ? snap.values : snap;
       var ui = (vals && vals.ui) || {};
+      var existingOrder = Array.isArray(ui.order) ? ui.order.slice() : [];
+      var subsIds = subs.map(function(x){ return x.id; });
+      for (var i = 0; i < subsIds.length; i++) {
+        if (existingOrder.indexOf(subsIds[i]) === -1) existingOrder.push(subsIds[i]);
+      }
+      existingOrder = existingOrder.filter(function(id){ return subsIds.indexOf(id) !== -1; });
       setSt(function(x){ return Object.assign({}, x, {
         status: "ready",
         storageDir: (vals && vals.storageDir) || "",
         refreshHours: (vals && vals.refreshHours) != null ? vals.refreshHours : 24,
         floatChip: ui.floatChip !== false,
         composerBar: ui.composerBar !== false,
+        activeOnTop: ui.activeOnTop !== false,
+        order: existingOrder,
+        subsList: subs
       }); });
     }).catch(function(){ if (!cancelled) setSt(function(x){ return Object.assign({}, x, { status: "unavailable" }); }); });
     return function(){ cancelled = true; };
   }, [ctx]);
+
   function save(){
     var scope = scopeRef.current;
     if (!scope) { setSt(function(x){ return Object.assign({}, x, { msg: "settingsScope unavailable" }); }); return; }
@@ -145,7 +172,12 @@ function ConfigFields(props){
     var payload = {
       storageDir: String(s.storageDir || ""),
       refreshHours: Number(s.refreshHours) || 24,
-      ui: { floatChip: !!s.floatChip, composerBar: !!s.composerBar },
+      ui: {
+        floatChip: !!s.floatChip,
+        composerBar: !!s.composerBar,
+        activeOnTop: !!s.activeOnTop,
+        order: s.order || []
+      },
     };
     Promise.all(Object.keys(payload).map(function(k){ return scope.set(k, payload[k]); })).then(function(){
       setSt(function(x){ return Object.assign({}, x, { saving: false, msg: t("saved") || "Saved" }); });
@@ -153,13 +185,47 @@ function ConfigFields(props){
       setSt(function(x){ return Object.assign({}, x, { saving: false, msg: String(e && e.message || e) }); });
     });
   }
+
   if (s.status === "loading") return jsx("div",{className:"kl-meta",children:t("loading")});
   if (s.status === "unavailable") return jsx("div",{className:"kl-meta",children:"settingsScope unavailable"});
+
   return jsxs("div",{style:{marginBottom:16,paddingBottom:12,borderBottom:"1px solid var(--dsw-alias-border-l2, #333)"},children:[
     jsxs("div",{className:"kl-field",children:[jsx("div",{className:"kl-fieldLabel",children:t("storageDir")}),jsx("input",{className:"kl-input",value:s.storageDir,onChange:function(e){setSt(function(x){return Object.assign({},x,{storageDir:e.target.value})})}})]}),
     jsxs("div",{className:"kl-field",children:[jsx("div",{className:"kl-fieldLabel",children:t("refreshHours")}),jsx("input",{className:"kl-input",type:"number",value:s.refreshHours,onChange:function(e){setSt(function(x){return Object.assign({},x,{refreshHours:e.target.value})})}})]}),
-    jsxs("label",{className:"kl-meta",style:{display:"flex",gap:8,alignItems:"center"},children:[jsx("input",{type:"checkbox",checked:!!s.floatChip,onChange:function(e){setSt(function(x){return Object.assign({},x,{floatChip:e.target.checked})})}}), t("floatChip")]}),
-    jsxs("label",{className:"kl-meta",style:{display:"flex",gap:8,alignItems:"center"},children:[jsx("input",{type:"checkbox",checked:!!s.composerBar,onChange:function(e){setSt(function(x){return Object.assign({},x,{composerBar:e.target.checked})})}}), t("composerBar")]}),
+    jsxs("label",{className:"kl-meta",style:{display:"flex",gap:8,alignItems:"center",marginBottom:6},children:[jsx("input",{type:"checkbox",checked:!!s.floatChip,onChange:function(e){setSt(function(x){return Object.assign({},x,{floatChip:e.target.checked})})}}), t("floatChip")]}),
+    jsxs("label",{className:"kl-meta",style:{display:"flex",gap:8,alignItems:"center",marginBottom:6},children:[jsx("input",{type:"checkbox",checked:!!s.composerBar,onChange:function(e){setSt(function(x){return Object.assign({},x,{composerBar:e.target.checked})})}}), t("composerBar")]}),
+    jsxs("label",{className:"kl-meta",style:{display:"flex",gap:8,alignItems:"center",marginBottom:12},children:[jsx("input",{type:"checkbox",checked:!!s.activeOnTop,onChange:function(e){setSt(function(x){return Object.assign({},x,{activeOnTop:e.target.checked})})}}), t("activeOnTop") || "Active account always on top"]}),
+    s.order && s.order.length ? jsxs("div",{style:{marginTop:10,marginBottom:12},children:[
+      jsx("div",{className:"kl-fieldLabel",style:{marginBottom:6},children:t("accountOrder") || "Account display order"}),
+      s.order.map(function(id, idx){
+        var item = s.subsList.find(function(x){ return x.id === id; });
+        var label = (item && item.label) || id;
+        var prov = (item && item.provider) || "";
+        return jsxs("div",{key:id,className:"kl-orderItem",children:[
+          jsxs("div",{style:{display:"flex",alignItems:"center",gap:8},children:[
+            jsx("span",{style:{fontSize:11,color:"var(--dsw-alias-label-tertiary,#888)",width:16},children:(idx+1)+"."}),
+            jsx("span",{style:{fontWeight:500,fontSize:12.5},children:label}),
+            prov?jsx("span",{className:"kl-provPill "+providerClass(prov),children:prov}):null
+          ]}),
+          jsxs("div",{className:"kl-orderBtns",children:[
+            jsx("button",{type:"button",className:"kl-orderBtn",disabled:idx===0,title:t("moveUp")||"▲",onClick:function(){
+              var nextOrder = s.order.slice();
+              var tmp = nextOrder[idx - 1];
+              nextOrder[idx - 1] = nextOrder[idx];
+              nextOrder[idx] = tmp;
+              setSt(function(x){ return Object.assign({}, x, { order: nextOrder }); });
+            },children:"▲"}),
+            jsx("button",{type:"button",className:"kl-orderBtn",disabled:idx===s.order.length-1,title:t("moveDown")||"▼",onClick:function(){
+              var nextOrder = s.order.slice();
+              var tmp = nextOrder[idx + 1];
+              nextOrder[idx + 1] = nextOrder[idx];
+              nextOrder[idx] = tmp;
+              setSt(function(x){ return Object.assign({}, x, { order: nextOrder }); });
+            },children:"▼"})
+          ]})
+        ]});
+      })
+    ]}):null,
     s.msg?jsx("div",{className:"kl-meta",children:s.msg}):null,
     jsx("div",{style:{marginTop:8},children:jsx("button",{type:"button",className:"kl-btn kl-btnPrimary",disabled:s.saving,onClick:save,children:s.saving?t("loading"):t("save")})})
   ]});

@@ -1,6 +1,11 @@
 /* locale */
 var KL_en={
-  storageDir:"Storage directory",refreshHours:"Refresh hours",floatChip:"Float chip",composerBar:"Composer bar",saved:"Saved",
+  storageDir:"Storage directory",
+  totalAccounts:"Total accounts",
+  activeOnTop:"Active account always on top",
+  accountOrder:"Account display order",
+  moveUp:"Move up",
+  moveDown:"Move down",refreshHours:"Refresh hours",floatChip:"Float chip",composerBar:"Composer bar",saved:"Saved",
 
   title:"Key Limits",subtitle:"API keys and subscription quotas",
   loading:"Loading…",close:"Close",cancel:"Cancel",save:"Save",add:"Add",
@@ -35,7 +40,12 @@ var KL_en={
 };
 
 var KL_zh={
-  storageDir:"数据目录",refreshHours:"刷新间隔(小时)",floatChip:"悬浮胶囊",composerBar:"输入栏按钮",saved:"已保存",
+  storageDir:"数据目录",
+  totalAccounts:"总账户数",
+  activeOnTop:"活跃账户置顶",
+  accountOrder:"账户显示顺序",
+  moveUp:"上移",
+  moveDown:"下移",refreshHours:"刷新间隔(小时)",floatChip:"悬浮胶囊",composerBar:"输入栏按钮",saved:"已保存",
 
   title:"密钥额度",subtitle:"API 密钥与订阅额度监控",
   loading:"加载中…",close:"关闭",cancel:"取消",save:"保存",add:"添加",
@@ -69,7 +79,36 @@ var KL_zh={
   checkUpdateFailed:"检查更新失败"
 };
 
-function klLang(){try{var l=(klCtx&&klCtx.locale&&klCtx.locale.locale)||(typeof navigator!=="undefined"&&navigator.language)||"en";return String(l).toLowerCase().indexOf("zh")===0?"zh":"en"}catch(e){return"en"}}
-function klT(key){var dict=klLang()==="zh"?KL_zh:KL_en;return dict[key]!=null?dict[key]:(KL_en[key]!=null?KL_en[key]:key)}
+var KL_ru = {
+  totalAccounts:"Всего аккаунтов",
+  activeOnTop:"Активный аккаунт всегда сверху",
+  accountOrder:"Очередность аккаунтов",
+  moveUp:"Вверх",
+  moveDown:"Вниз",
+  refresh:"Обновить",
+  refreshAll:"Обновить все",
+  refreshing:"Обновление…",
+  allTitle:"Лимиты подписок",
+  noSubs:"Нет подключенных ключей",
+  loading:"Загрузка…",
+  save:"Сохранить",
+  saved:"Сохранено",
+  close:"Закрыть"
+};
+
+function klLang(){
+  try{
+    var l=(klCtx&&klCtx.locale&&klCtx.locale.locale)||(typeof navigator!=="undefined"&&navigator.language)||"en";
+    var s=String(l).toLowerCase();
+    if(s.indexOf("zh")===0)return "zh";
+    if(s.indexOf("ru")===0)return "ru";
+    return "en";
+  }catch(e){return "en"}
+}
+function klT(key){
+  var lang=klLang();
+  var dict=lang==="zh"?KL_zh:(lang==="ru"?KL_ru:KL_en);
+  return dict[key]!=null?dict[key]:(KL_en[key]!=null?KL_en[key]:key);
+}
 function makeT(dict,fb){return function(k){return dict[k]!=null?dict[k]:(fb[k]!=null?fb[k]:k)}}
 function useActiveLocale(ctx){var st=useState(function(){try{return (ctx.locale&&ctx.locale.locale)||"en"}catch(e){return"en"}});useEffect(function(){if(!ctx||!ctx.locale||!ctx.locale.watch)return;return ctx.locale.watch(function(l){st[1](l)})},[ctx]);return String(st[0]||"").toLowerCase().indexOf("zh")===0?"zh":"en"}
