@@ -165,10 +165,72 @@ function ConfigFields(props){
   ]});
 }
 
+function UpdaterSection(props){
+  var t = props.t || klT;
+  var st = useState({ checking: false, updating: false, data: null, error: "", notice: "" });
+  var s = st[0], setSt = st[1];
+
+  function check(){
+    setSt(function(x){ return Object.assign({}, x, { checking: true, error: "", notice: "" }); });
+    fetch(API + "/update", { cache: "no-store" })
+      .then(function(res){
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        return res.json();
+      })
+      .then(function(data){
+        setSt(function(x){ return Object.assign({}, x, { checking: false, data: data }); });
+      })
+      .catch(function(err){
+        setSt(function(x){ return Object.assign({}, x, { checking: false, error: t("checkUpdateFailed") }); });
+      });
+  }
+
+  function triggerUpdate(){
+    if (s.updating) return;
+    setSt(function(x){ return Object.assign({}, x, { updating: true, error: "", notice: "" }); });
+    fetch(API + "/update", {
+      method: "POST",
+      headers: { "x-dsh-plugin-update": "1" }
+    })
+      .then(function(res){ return res.json(); })
+      .then(function(resData){
+        if (resData.error) throw new Error(resData.error);
+        setSt(function(x){
+          var cur = resData.updatedVersion || (x.data && x.data.latestVersion) || "";
+          var nextData = Object.assign({}, x.data, { currentVersion: cur, updateAvailable: false });
+          return Object.assign({}, x, {
+            updating: false,
+            data: nextData,
+            notice: t("updateSuccess") + cur + (resData.restartRequired ? t("restartRequired") : "")
+          });
+        });
+      })
+      .catch(function(err){
+        setSt(function(x){ return Object.assign({}, x, { updating: false, error: t("updateFailed") + (err.message || String(err)) }); });
+      });
+  }
+
+  return jsxs("div",{style:{marginTop:16,paddingTop:12,borderTop:"1px solid var(--dsw-alias-border-l2, #333)"},children:[
+    jsxs("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between"},children:[
+      jsxs("div",{className:"kl-meta",children:[
+        s.data ? ("v" + s.data.currentVersion) : "",
+        s.data && s.data.updateAvailable ? (" → v" + s.data.latestVersion) : ""
+      ]}),
+      jsx("div",{children:
+        s.data && s.data.updateAvailable ?
+          jsx("button",{type:"button",className:"kl-btn kl-btnPrimary",disabled:s.updating,onClick:triggerUpdate,children:s.updating ? t("updating") : t("updateNow")}) :
+          jsx("button",{type:"button",className:"kl-btn",disabled:s.checking,onClick:check,children:s.checking ? t("checkingUpdates") : (s.data ? t("upToDate") : t("checkForUpdates"))})
+      })
+    ]}),
+    s.notice ? jsx("div",{className:"kl-meta",style:{color:"#10b981",marginTop:6},children:s.notice}) : null,
+    s.error ? jsx("div",{className:"kl-alertError",style:{marginTop:6},children:s.error}) : null
+  ]});
+}
+
 function KeyLimitsPluginCard(props){
   var ctx = (props && props.ctx) || klCtx;
   var lang = useActiveLocale(ctx),
-      dict = lang === "ru" ? KL_ru : KL_en,
+      dict = lang === "zh" ? KL_zh : KL_en,
       t = (typeof props.t === "function") ? props.t : makeT(dict, KL_en),
       st = useState(false),
       open = st[0],
@@ -183,7 +245,8 @@ function KeyLimitsPluginCard(props){
     ]}),
     open?jsxs("div",{className:"kl-body",children:[
       jsx(ConfigFields,{ctx:ctx,t:t}),
-      jsx(KeysSettingsBody,{})
+      jsx(KeysSettingsBody,{}),
+      jsx(UpdaterSection,{ctx:ctx,t:t})
     ]}):null
   ]});
 }
@@ -197,7 +260,7 @@ function registerKeyLimitsSettings(ctx){
     }
   }
   ctx.effect(function () {
-    var undo = [addLocale('en', KL_en), addLocale('ru', KL_ru)]
+    var undo = [addLocale('en', KL_en), addLocale('zh', KL_zh)]
     return function () { undo.forEach(function (off) { off() }) }
   }, "key-limits: locale");
   function loc(){return useActiveLocale(ctx)}

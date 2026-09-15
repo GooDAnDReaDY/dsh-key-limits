@@ -18,5 +18,5 @@ test('регистрация словарей переживает заняты�
   assert.match(src, /function addLocale/, 'языки объявляются по одному')
   assert.match(src, /catch \(alreadyTaken\)/, 'занятый язык не должен ронять плагин')
   assert.match(src, /addLocale\('en'/, 'английский свой')
-  assert.match(src, /addLocale\('ru'/, 'русский свой')
+  assert.match(src, /addLocale\('zh'/, 'китайский свой')
 })
