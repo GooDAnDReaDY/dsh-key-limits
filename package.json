@@ -1,6 +1,6 @@
 {
   "name": "@goodandready/dsh-key-limits",
-  "version": "0.1.10",
+  "version": "0.2.0",
   "description": "DeepSeek Harness plugin: API key / subscription quota limits (float chip, composer bar, settings).",
   "type": "module",
   "main": "lib/index.js",
@@ -63,8 +63,6 @@
   "scripts": {
     "build:client": "node scripts/build-client.mjs",
     "test": "node --test",
-    "prepublishOnly": "npm run build:client && node --test",
-    "smoke": "bash scripts/smoke-staging.sh",
-    "deploy:staging": "bash scripts/deploy-staging.sh"
+    "prepublishOnly": "npm run build:client && node --test"
   }
 }

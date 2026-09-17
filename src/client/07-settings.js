@@ -189,7 +189,7 @@ function ConfigFields(props){
   if (s.status === "loading") return jsx("div",{className:"kl-meta",children:t("loading")});
   if (s.status === "unavailable") return jsx("div",{className:"kl-meta",children:"settingsScope unavailable"});
 
-  return jsxs("div",{style:{marginBottom:16,paddingBottom:12,borderBottom:"1px solid var(--dsw-alias-border-l2, #333)"},children:[
+  return jsxs("div",{style:{marginBottom:16,paddingBottom:12,borderBottom:"1px solid var(--dsw-alias-border-l2)"},children:[
     jsxs("div",{className:"kl-field",children:[jsx("div",{className:"kl-fieldLabel",children:t("storageDir")}),jsx("input",{className:"kl-input",value:s.storageDir,onChange:function(e){setSt(function(x){return Object.assign({},x,{storageDir:e.target.value})})}})]}),
     jsxs("div",{className:"kl-field",children:[jsx("div",{className:"kl-fieldLabel",children:t("refreshHours")}),jsx("input",{className:"kl-input",type:"number",value:s.refreshHours,onChange:function(e){setSt(function(x){return Object.assign({},x,{refreshHours:e.target.value})})}})]}),
     jsxs("label",{className:"kl-meta",style:{display:"flex",gap:8,alignItems:"center",marginBottom:6},children:[jsx("input",{type:"checkbox",checked:!!s.floatChip,onChange:function(e){setSt(function(x){return Object.assign({},x,{floatChip:e.target.checked})})}}), t("floatChip")]}),
@@ -203,7 +203,7 @@ function ConfigFields(props){
         var prov = (item && item.provider) || "";
         return jsxs("div",{key:id,className:"kl-orderItem",children:[
           jsxs("div",{style:{display:"flex",alignItems:"center",gap:8},children:[
-            jsx("span",{style:{fontSize:11,color:"var(--dsw-alias-label-tertiary,#888)",width:16},children:(idx+1)+"."}),
+            jsx("span",{style:{fontSize:11,color:"var(--dsw-alias-label-tertiary)",width:16},children:(idx+1)+"."}),
             jsx("span",{style:{fontWeight:500,fontSize:12.5},children:label}),
             prov?jsx("span",{className:"kl-provPill "+providerClass(prov),children:prov}):null
           ]}),
@@ -276,7 +276,7 @@ function UpdaterSection(props){
       });
   }
 
-  return jsxs("div",{style:{marginTop:16,paddingTop:12,borderTop:"1px solid var(--dsw-alias-border-l2, #333)"},children:[
+  return jsxs("div",{style:{marginTop:16,paddingTop:12,borderTop:"1px solid var(--dsw-alias-border-l2)"},children:[
     jsxs("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between"},children:[
       jsxs("div",{className:"kl-meta",children:[
         s.data ? ("v" + s.data.currentVersion) : "",
@@ -288,9 +288,17 @@ function UpdaterSection(props){
           jsx("button",{type:"button",className:"kl-btn",disabled:s.checking,onClick:check,children:s.checking ? t("checkingUpdates") : (s.data ? t("upToDate") : t("checkForUpdates"))})
       })
     ]}),
-    s.notice ? jsx("div",{className:"kl-meta",style:{color:"#10b981",marginTop:6},children:s.notice}) : null,
+    s.notice ? jsx("div",{className:"kl-meta",style:{color:"var(--dsw-alias-state-success)",marginTop:6},children:s.notice}) : null,
     s.error ? jsx("div",{className:"kl-alertError",style:{marginTop:6},children:s.error}) : null
   ]});
+}
+
+var ChevronIcon = null;
+try {
+  var primitives = require("@deepseek-ai/dsh-client-ui-primitives");
+  ChevronIcon = primitives && (primitives.IconChevronDownOutline14 || primitives.IconChevronDown);
+} catch (_) {
+  ChevronIcon = null;
 }
 
 function KeyLimitsPluginCard(props){
@@ -307,7 +315,7 @@ function KeyLimitsPluginCard(props){
         jsx("div",{className:"kl-title",children:t("title")}),
         jsx("div",{className:"kl-sub",children:t("subtitle")})
       ]}),
-      jsx("span",{className:"kl-chev"+(open?" kl-chev-open":""),"aria-hidden":"true",children:jsx("svg",{width:14,height:14,viewBox:"0 0 14 14",fill:"none",stroke:"currentColor",strokeWidth:1.5,style:{display:"block"},children:jsx("path",{d:"M3.5 5.25L7 8.75L10.5 5.25"})})})
+      jsx("span",{className:"kl-chev"+(open?" kl-chev-open":""),"aria-hidden":"true",children:ChevronIcon?jsx(ChevronIcon,{style:{display:"block",width:14,height:14}}):jsx("svg",{width:14,height:14,viewBox:"0 0 14 14",fill:"none",stroke:"currentColor",strokeWidth:1.5,style:{display:"block"},children:jsx("path",{d:"M3.5 5.25L7 8.75L10.5 5.25"})})})
     ]}),
     open?jsxs("div",{className:"kl-body",children:[
       jsx(ConfigFields,{ctx:ctx,t:t}),

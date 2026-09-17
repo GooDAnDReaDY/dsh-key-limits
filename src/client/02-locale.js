@@ -36,7 +36,14 @@ var KL_en={
   updateSuccess:"Updated to ",
   restartRequired:" (restart required)",
   updateFailed:"Update failed: ",
-  checkUpdateFailed:"Failed to check for updates"
+  checkUpdateFailed:"Failed to check for updates",
+  minRemaining:"Min. quota",
+  balanceUsd:"Balance ($)",
+  tabAll:"All",
+  tabQuotas:"Quotas",
+  tabBalances:"Balances",
+  emptySettingsHint:"Add provider keys and tokens in plugin settings to track live quotas and balances.",
+  activeBadge:" active",
 };
 
 var KL_zh={
@@ -76,38 +83,28 @@ var KL_zh={
   updateSuccess:"已成功更新至 ",
   restartRequired:" (需重启 DSH)",
   updateFailed:"更新失败: ",
-  checkUpdateFailed:"检查更新失败"
+  checkUpdateFailed:"检查更新失败",
+  minRemaining:"最低额度",
+  balanceUsd:"余额 ($)",
+  tabAll:"全部",
+  tabQuotas:"配额",
+  tabBalances:"余额",
+  emptySettingsHint:"请在插件设置中添加提供商密钥，以实时监控配额与余额。",
+  activeBadge:" 个活跃",
 };
 
-var KL_ru = {
-  totalAccounts:"Всего аккаунтов",
-  activeOnTop:"Активный аккаунт всегда сверху",
-  accountOrder:"Очередность аккаунтов",
-  moveUp:"Вверх",
-  moveDown:"Вниз",
-  refresh:"Обновить",
-  refreshAll:"Обновить все",
-  refreshing:"Обновление…",
-  allTitle:"Лимиты подписок",
-  noSubs:"Нет подключенных ключей",
-  loading:"Загрузка…",
-  save:"Сохранить",
-  saved:"Сохранено",
-  close:"Закрыть"
-};
 
 function klLang(){
   try{
-    var l=(klCtx&&klCtx.locale&&klCtx.locale.locale)||(typeof navigator!=="undefined"&&navigator.language)||"en";
+    var l=(klCtx&&klCtx.locale&&klCtx.locale.locale)||"en";
     var s=String(l).toLowerCase();
     if(s.indexOf("zh")===0)return "zh";
-    if(s.indexOf("ru")===0)return "ru";
     return "en";
   }catch(e){return "en"}
 }
 function klT(key){
   var lang=klLang();
-  var dict=lang==="zh"?KL_zh:(lang==="ru"?KL_ru:KL_en);
+  var dict=lang==="zh"?KL_zh:KL_en;
   return dict[key]!=null?dict[key]:(KL_en[key]!=null?KL_en[key]:key);
 }
 function makeT(dict,fb){return function(k){return dict[k]!=null?dict[k]:(fb[k]!=null?fb[k]:k)}}

@@ -17,7 +17,7 @@ function QuotaBars(props){
               jsx("div", { className: "kl-bentoLabel", children: w.label || w.id }),
               jsx("div", {
                 className: "kl-bentoPct",
-                style: { color: rem <= DANGER ? "#ef4444" : (rem <= WARN ? "#f59e0b" : "#10b981") },
+                style: { color: rem <= DANGER ? "var(--dsw-alias-state-danger)" : (rem <= WARN ? "var(--dsw-alias-state-warning)" : "var(--dsw-alias-state-success)") },
                 children: fmtPct(rem)
               })
             ]
@@ -118,7 +118,7 @@ function SubCard(props){
                 children: [
                   jsx("span", { className: "kl-provPill " + pCls, children: s.provider }),
                   s.plan ? jsx("span", { className: "kl-meta", style: { fontWeight: 600 }, children: s.plan }) : null,
-                  s.status === "ok" ? jsx("span", { className: "kl-dot", style: { background: "#10b981" } }) : null
+                  s.status === "ok" ? jsx("span", { className: "kl-dot", style: { background: "var(--dsw-alias-state-success)" } }) : null
                 ]
               }),
               jsx("div", { className: "kl-subTitle", children: s.label || s.id })
@@ -289,7 +289,7 @@ function AllLimitsModal(props){
                     className: "kl-panelTitle",
                     children: [
                       klT("allTitle"),
-                      jsx("span", { className: "kl-countBadge", children: subs.length ? subs.length + " активных" : "0" })
+                      jsx("span", { className: "kl-countBadge", children: subs.length ? subs.length + klT("activeBadge") : "0" })
                     ]
                   })
                 ]
@@ -306,11 +306,11 @@ function AllLimitsModal(props){
                   jsxs("div", {
                     className: "kl-statCard",
                     children: [
-                      jsx("div", { className: "kl-statLabel", children: klT("totalAccounts") || "Всего аккаунтов" }),
+                      jsx("div", { className: "kl-statLabel", children: klT("totalAccounts") }),
                       jsxs("div", {
                         className: "kl-statVal",
                         children: [
-                          jsx("span", { className: "kl-dot", style: { background: "#10b981" } }),
+                          jsx("span", { className: "kl-dot", style: { background: "var(--dsw-alias-state-success)" } }),
                           subs.length
                         ]
                       })
@@ -319,10 +319,10 @@ function AllLimitsModal(props){
                   jsxs("div", {
                     className: "kl-statCard",
                     children: [
-                      jsx("div", { className: "kl-statLabel", children: "Мин. остаток" }),
+                      jsx("div", { className: "kl-statLabel", children: klT("minRemaining") }),
                       jsx("div", {
                         className: "kl-statVal",
-                        style: { color: worstQuota != null ? (worstQuota <= DANGER ? "#ef4444" : (worstQuota <= WARN ? "#f59e0b" : "#10b981")) : "inherit" },
+                        style: { color: worstQuota != null ? (worstQuota <= DANGER ? "var(--dsw-alias-state-danger)" : (worstQuota <= WARN ? "var(--dsw-alias-state-warning)" : "var(--dsw-alias-state-success)")) : "inherit" },
                         children: worstQuota != null ? fmtPct(worstQuota) : "—"
                       })
                     ]
@@ -330,8 +330,8 @@ function AllLimitsModal(props){
                   jsxs("div", {
                     className: "kl-statCard",
                     children: [
-                      jsx("div", { className: "kl-statLabel", children: "Баланс ($)" }),
-                      jsx("div", { className: "kl-statVal", style: { color: "#38bdf8" }, children: "$" + totalBalUSD.toFixed(2) })
+                      jsx("div", { className: "kl-statLabel", children: klT("balanceUsd") }),
+                      jsx("div", { className: "kl-statVal", style: { color: "var(--dsw-alias-brand-primary)" }, children: "$" + totalBalUSD.toFixed(2) })
                     ]
                   })
                 ]
@@ -347,19 +347,19 @@ function AllLimitsModal(props){
                         type: "button",
                         className: "kl-tabBtn " + (state.tab === "all" ? "active" : ""),
                         onClick: function(){ setSt(function(s){ return Object.assign({}, s, { tab: "all" }); }); },
-                        children: "Все (" + subs.length + ")"
+                        children: klT("tabAll") + " (" + subs.length + ")"
                       }),
                       jsx("button", {
                         type: "button",
                         className: "kl-tabBtn " + (state.tab === "quota" ? "active" : ""),
                         onClick: function(){ setSt(function(s){ return Object.assign({}, s, { tab: "quota" }); }); },
-                        children: "Квоты (" + quotaCount + ")"
+                        children: klT("tabQuotas") + " (" + quotaCount + ")"
                       }),
                       jsx("button", {
                         type: "button",
                         className: "kl-tabBtn " + (state.tab === "balance" ? "active" : ""),
                         onClick: function(){ setSt(function(s){ return Object.assign({}, s, { tab: "balance" }); }); },
-                        children: "Балансы (" + balCount + ")"
+                        children: klT("tabBalances") + " (" + balCount + ")"
                       })
                     ]
                   }),
@@ -381,9 +381,9 @@ function AllLimitsModal(props){
               !state.loading && !filtered.length ? jsxs("div", {
                 className: "kl-emptyBox",
                 children: [
-                  jsx(SvgKey, { size: 36, style: { color: "rgba(255,255,255,0.2)" } }),
+                  jsx(SvgKey, { size: 36, style: { color: "var(--dsw-alias-border-l1)" } }),
                   jsx("div", { className: "kl-emptyTitle", children: klT("noSubs") }),
-                  jsx("div", { className: "kl-emptyText", children: "Добавьте ключи и токены провайдеров в настройках плагина, чтобы отслеживать актуальные квоты и балансы." })
+                  jsx("div", { className: "kl-emptyText", children: klT("emptySettingsHint") })
                 ]
               }) : null,
 

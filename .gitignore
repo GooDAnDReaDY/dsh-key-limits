@@ -2,3 +2,13 @@ node_modules/
 .worktrees/
 *.tgz
 .DS_Store
+openwiki/
+
+# Internal agent and workflow files
+AGENTS.md
+index.md
+docs/TZ.md
+docs/plans/
+docs/superpowers/
+scripts/deploy-staging.sh
+scripts/smoke-staging.sh
