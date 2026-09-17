@@ -4,19 +4,25 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-// Язык для чужого пространства объявляют и словарные пакеты. Ядро на
-// повторное объявление той же пары бросает исключение, и незащищённый вызов
-// уносит с собой весь плагин — а в интерфейсе это читается как отказ
-// загрузить сразу несколько соседних. Ошибка тихая ровно до того момента,
-// когда становится громкой, поэтому проверяем форму вызова по исходнику.
-test('регистрация словарей переживает занятый язык', () => {
+test('locale registration handles occupied languages gracefully', () => {
   const file = path.join(path.dirname(fileURLToPath(import.meta.url)), '../lib/client.js')
   const src = readFileSync(file, 'utf8')
 
   assert.equal(src.includes('ctx.locale.register(NS,{en:'), false,
-    'обе пары разом — тот самый незащищённый вызов')
-  assert.match(src, /function addLocale/, 'языки объявляются по одному')
-  assert.match(src, /catch \(alreadyTaken\)/, 'занятый язык не должен ронять плагин')
-  assert.match(src, /addLocale\('en'/, 'английский свой')
-  assert.match(src, /addLocale\('zh'/, 'китайский свой')
+    'registering both languages at once is unsafe')
+  assert.match(src, /function addLocale/, 'locales are registered individually')
+  assert.match(src, /catch \(alreadyTaken\)/, 'occupied locale does not crash plugin')
+  assert.match(src, /addLocale\('en'/, 'en locale registered')
+  assert.match(src, /addLocale\('zh'/, 'zh locale registered')
+})
+
+test('source code and tests contain no cyrillic characters', () => {
+  const check = (rel) => {
+    const text = readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), '..', rel), 'utf8')
+    assert.equal(/[а-яА-ЯёЁ]/.test(text), false, rel + ' must not contain cyrillic')
+  }
+  check('src/client/02-locale.js')
+  check('src/client/04-modals.js')
+  check('lib/client.js')
+  check('lib/subs.js')
 })
