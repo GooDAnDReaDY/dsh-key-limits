@@ -7,13 +7,19 @@ import path from 'node:path'
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..')
 const read = (rel) => readFileSync(path.join(root, rel), 'utf8')
 
-test('public package identity matches in all loader sites', () => {
+test('public package identity matches in all four loader sites', () => {
   const pkg = JSON.parse(read('package.json'))
   assert.equal(pkg.name, '@goodandready/dsh-key-limits')
   assert.equal(pkg.publishConfig.access, 'public')
   assert.equal(pkg.private, undefined)
-  assert.ok(read('cordis.patch.yml').includes("name: '" + pkg.name + "'"))
-  assert.ok(read('lib/client.js').includes('load({id:"' + pkg.name + '"'))
+  assert.ok(read('cordis.patch.yml').includes("name: '" + pkg.name + "'"), 'cordis.patch.yml has matching name')
+  assert.ok(read('lib/client.js').includes('load({id:"' + pkg.name + '"'), 'lib/client.js has matching id')
+  assert.ok(read('lib/index.js').includes("export const name = '" + pkg.name + "'"), 'lib/index.js has matching export const name')
+})
+
+test('no legacy private scope remains in lib files', () => {
+  assert.ok(!read('lib/index.js').includes('goodandready-private'), 'lib/index.js must not mention private scope')
+  assert.ok(!read('lib/plugin-updater.js').includes('goodandready-private'), 'lib/plugin-updater.js must not mention private scope')
 })
 
 test('package metadata points to the public GitHub repository', () => {
