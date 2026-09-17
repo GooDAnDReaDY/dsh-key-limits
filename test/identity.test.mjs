@@ -51,3 +51,10 @@ test('settings namespace and route prefix are distinct and match client key', ()
   const prelude = read('src/client/01-prelude.js')
   assert.ok(prelude.includes('NS="' + settingsNs + '"'), 'client NS must match host SETTINGS_NS')
 })
+
+test('settings card requests core chevron icon with safe fallback', () => {
+  const clientSrc = read('lib/client.js')
+  assert.ok(clientSrc.includes('IconChevronDownOutline14'), 'must request core IconChevronDownOutline14')
+  assert.ok(clientSrc.includes('@deepseek-ai/dsh-client-ui-primitives'), 'must require primitives package')
+  assert.ok(clientSrc.includes('catch'), 'primitives require must be wrapped in try/catch')
+})

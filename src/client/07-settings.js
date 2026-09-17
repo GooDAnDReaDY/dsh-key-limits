@@ -293,6 +293,14 @@ function UpdaterSection(props){
   ]});
 }
 
+var ChevronIcon = null;
+try {
+  var primitives = require("@deepseek-ai/dsh-client-ui-primitives");
+  ChevronIcon = primitives && (primitives.IconChevronDownOutline14 || primitives.IconChevronDown);
+} catch (_) {
+  ChevronIcon = null;
+}
+
 function KeyLimitsPluginCard(props){
   var ctx = (props && props.ctx) || klCtx;
   var lang = useActiveLocale(ctx),
@@ -307,7 +315,7 @@ function KeyLimitsPluginCard(props){
         jsx("div",{className:"kl-title",children:t("title")}),
         jsx("div",{className:"kl-sub",children:t("subtitle")})
       ]}),
-      jsx("span",{className:"kl-chev"+(open?" kl-chev-open":""),"aria-hidden":"true",children:jsx("svg",{width:14,height:14,viewBox:"0 0 14 14",fill:"none",stroke:"currentColor",strokeWidth:1.5,style:{display:"block"},children:jsx("path",{d:"M3.5 5.25L7 8.75L10.5 5.25"})})})
+      jsx("span",{className:"kl-chev"+(open?" kl-chev-open":""),"aria-hidden":"true",children:ChevronIcon?jsx(ChevronIcon,{style:{display:"block",width:14,height:14}}):jsx("svg",{width:14,height:14,viewBox:"0 0 14 14",fill:"none",stroke:"currentColor",strokeWidth:1.5,style:{display:"block"},children:jsx("path",{d:"M3.5 5.25L7 8.75L10.5 5.25"})})})
     ]}),
     open?jsxs("div",{className:"kl-body",children:[
       jsx(ConfigFields,{ctx:ctx,t:t}),
