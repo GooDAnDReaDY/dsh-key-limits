@@ -1,32 +1,21 @@
-# DESIGN.md — @goodandready/dsh-key-limits
-
-Дизайн-контракт пользовательского опыта, интерфейса и визуальных решений плагина лимитов API-ключей и подписок DeepSeek Harness (DSH).
-
----
+# DESIGN.md — dsh-key-limits
 
 ## Product / Purpose
-- **Назначение:** Мониторинг квот и балансов подписок/API-ключей без избыточного функционала (никаких графиков, тарифов, учёта расходов или ledger).
-- **Аудитория:** Пользователи и администраторы DSH, использующие внешние AI-провайдеры (Command Code, OpenCode GO, Qwen, Ollama, Kimi, Z.ai, MiniMax, Cline, DeepSeek, OpenRouter).
-- **Статус:** Активный DSH Web-плагин (Public package `@goodandready/dsh-key-limits`).
+- **Назначение:** Отображение квот, оставшихся лимитов и балансов API-ключей/подписок провайдеров в DeepSeek Harness (DSH). Предотвращает внезапное исчерпание лимитов при диалогах с AI.
+- **Канонический путь репозитория:** `/mnt/external/Project/DEV/dhsplugins/dsh-key-limits` (согласно `dhs-plugin-release-workflow`).
+- **Аудитория:** Разработчики и пользователи DSH, использующие несколько провайдеров (OpenCode, DeepSeek, OpenRouter, Kimi, GLM, MiniMax, Cline, Ollama, Command Code).
+- **Статус:** Production-ready. Версия 0.1.10.
 
 ---
 
 ## User Surfaces
 - **Web/UI:**
-  - **Floating Chip (`FloatChip`):** Плавающий индикатор общего состояния всех подписок (наименьший оставшийся процент квоты либо количество активных ключей). Поддерживает свободный drag с сохранением позиции в `localStorage` (`kl-chip-pos`) и viewport boundary clamping. Клик открывает модальное окно всех лимитов (`AllLimitsModal`).
-  - **Composer Bar Button (`ActiveKeyButton`):** Кнопка в панели ввода сообщений активной сессии (`conversation.composer.bar`, priority 10). Отображает оставшуюся квоту (%) или баланс ($/¥) подписки, привязанной к модели текущей сессии. Клик открывает детальную модалку активного ключа (`OneLimitModal`).
-  - **Settings Card (`KeyLimitsPluginCard`):** Стандартная сворачиваемая карточка плагина во вкладке «Настройки → Плагины» (слот `settings.plugin.item`). Содержит:
-    - Управление общими параметрами (`storageDir`, `refreshIntervalMs`).
-    - Опцию «Активный всегда сверху» (`activeOnTop: boolean`).
-    - Список ручной сортировки аккаунтов (`order: string[]`) с кнопками ▲ / ▼.
-    - Управление списком ключей (добавление, ручной refresh, удаление).
-    - Встроенный One-Click Updater с проверкой реестра npmjs.
-  - **All Limits Hub (`AllLimitsModal`):** Полноэкранное/центрированное модальное окно со сводкой всех ключей, фильтрацией по табам («Все», «Квоты», «Балансы») и отступом 12px между карточками (`.kl-list`).
-  - **Active Limit Detail (`OneLimitModal`):** Компактная модалка с детальным разбором окон лимита активной сессии (Rolling 5h, Weekly, Monthly).
-  - **Add Key Modal (`AddKeyModal`):** Форма добавления ключа/токена с динамическими полями провайдера.
+  - `FloatChip`: плавающий draggable-чип с индикацией минимальной оставшейся квоты и количества активных ключей. Клик открывает All Limits Hub.
+  - `ActiveKeyButton`: компактная кнопка в composer bar рядом с вводом сообщения. Показывает текущий активный ключ и процент остатка. Клик открывает One Limit Modal текущего провайдера.
+  - `AllLimitsModal`: оверлей со всеми добавленными подписками, окнами квот (5h, weekly, monthly) и балансами.
+  - `AddKeyModal`: диалог добавления ключа с валидацией провайдера и автоматическим тестом квоты.
 - **DSH UI / settings / slots:**
-  - `settings.plugin.item`: key = `dsh-key-limits`, locale = `dsh-key-limits`.
-  - **Изоляция пространств имён (Issue #32):** `SETTINGS_NS = 'dsh-key-limits'` (пространство настроек без ведущего слэша) строго совпадает со слотом карточки. Все HTTP маршруты хоста изолированы под отдельной именованной константой пути `ROUTE_PREFIX = '/dsh-key-limits'`.
+  - `settings.plugin.item`: key = `dsh-key-limits` (`SETTINGS_NS`), карточка в «Настройки → Плагины → Настройки плагинов».
   - `conversation.composer.bar`: id = `key-limits-active`.
   - Body Root: `#dsh-key-limits-root` для плавающего чипа.
 - **API:**
@@ -61,12 +50,12 @@
 
 ## Foundations
 - **Цвета и роли:**
-  - Фоны и границы: `var(--dsw-alias-bg-base)`, `var(--dsw-alias-bg-layer-3)`, `rgba(255, 255, 255, 0.07)`.
+  - Фоны и границы: `var(--dsw-alias-bg-base)`, `var(--dsw-alias-bg-layer-3)`, `var(--dsw-alias-border-subtle)`.
   - Текст: `var(--dsw-alias-label-primary)`, `var(--dsw-alias-label-secondary)`, `var(--dsw-alias-label-tertiary)`.
   - Семантические цвета квот:
-    - Normal / Safe (> 30% remaining): спокойный нейтральный цвет текста / акцентный изумруд `#34d399` для полосы.
-    - Warning (15% .. 30% remaining): `#fbbf24` (Amber).
-    - Danger (< 15% remaining): `#f87171` (Red).
+    - Normal / Safe (> 30% remaining): спокойный нейтральный цвет текста / `var(--dsw-alias-state-success)`.
+    - Warning (15% .. 30% remaining): `var(--dsw-alias-state-warning)`.
+    - Danger (< 15% remaining): `var(--dsw-alias-state-danger)`.
     - Muted / Stale / No Route: `var(--dsw-alias-label-tertiary)`.
 - **Типографика:** Системный DSH стек шрифтов, tabular-nums для цифр процентов и балансов.
 - **Сетка, отступы, responsive:** Bento-сетка для окон квот (`.kl-bentoGrid`), карточка скругление 12px, модалка 24px, плавающий чип 999px pill.
@@ -113,3 +102,9 @@
 - **2026-09-04:** Хранение ключей переведено на сервис DSH credentials, в `subs.json` сохраняется только `credentialRef`.
 - **2026-09-15:** Изоляция стилей через `data-dsh-plugin="dsh-key-limits"` с выгрузкой через `ctx.effect`.
 - **2026-09-15:** Clamping плавающего чипа в границах видимого экрана и поддержка `Escape` для модалок.
+- **2026-09-17:** Разделение констант namespace: маршрутный префикс `ROUTE_PREFIX = '/dsh-key-limits'` и пространство настроек `SETTINGS_NS = 'dsh-key-limits'` (#32).
+- **2026-09-17:** Полное удаление зашитого словаря `KL_ru` и браузерного fallback из плагина; `en` и `zh` в плагине, `ru` через `dsh-russian-lang` (#28).
+- **2026-09-17:** Исключение всех standalone `rgba` и `hex` цветов из `src/client/*` в пользу CSS-токенов темы DSH `var(--dsw-alias-*)` (#33).
+- **2026-09-17:** Декомпозиция `lib/subs.js` (1006 строк) на `lib/provider-fetchers.js` и компактный `lib/subs.js` (#35).
+- **2026-09-17:** Каноническое размещение репозитория плагина в `/mnt/external/Project/DEV/dhsplugins/dsh-key-limits` согласно стандарту `dhs-plugin-release-workflow` (#9).
+- **2026-09-17:** Публикационный слой `publish.sh` и `.gitattributes` исключают внутренние файлы разработки (`AGENTS.md`, `index.md`, `docs/plans`, деплойные скрипты) из публичного GitHub-зеркала (#31).
