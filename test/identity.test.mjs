@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 
@@ -57,4 +57,15 @@ test('settings card requests core chevron icon with safe fallback', () => {
   assert.ok(clientSrc.includes('IconChevronDownOutline14'), 'must request core IconChevronDownOutline14')
   assert.ok(clientSrc.includes('@deepseek-ai/dsh-client-ui-primitives'), 'must require primitives package')
   assert.ok(clientSrc.includes('catch'), 'primitives require must be wrapped in try/catch')
+})
+
+test('client styles use theme variables with zero standalone hex or rgba', () => {
+  
+  const clientDir = path.join(root, 'src/client')
+  const files = readdirSync(clientDir).filter((f) => f.endsWith('.js'))
+  for (const file of files) {
+    const content = read(path.join('src/client', file))
+    assert.equal(content.includes('rgba('), false, file + ' must contain zero rgba(')
+    assert.equal(/#[0-9a-fA-F]{3,6}/.test(content), false, file + ' must contain zero hex colors')
+  }
 })
