@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.11
+## 0.2.0
 
 - **Architecture Decomposition**:
   - Decomposed `lib/subs.js` into modular architecture, extracting provider balance and quota adapters into `lib/provider-fetchers.js`.
