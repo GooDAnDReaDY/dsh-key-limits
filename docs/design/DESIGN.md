@@ -26,6 +26,7 @@
   - **Add Key Modal (`AddKeyModal`):** Форма добавления ключа/токена с динамическими полями провайдера.
 - **DSH UI / settings / slots:**
   - `settings.plugin.item`: key = `dsh-key-limits`, locale = `dsh-key-limits`.
+  - **Изоляция пространств имён (Issue #32):** `SETTINGS_NS = 'dsh-key-limits'` (пространство настроек без ведущего слэша) строго совпадает со слотом карточки. Все HTTP маршруты хоста изолированы под отдельной именованной константой пути `ROUTE_PREFIX = '/dsh-key-limits'`.
   - `conversation.composer.bar`: id = `key-limits-active`.
   - Body Root: `#dsh-key-limits-root` для плавающего чипа.
 - **API:**
