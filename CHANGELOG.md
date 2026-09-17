@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.1.11
+
+- **Architecture Decomposition**:
+  - Decomposed `lib/subs.js` into modular architecture, extracting provider balance and quota adapters into `lib/provider-fetchers.js`.
+  - Preserved backward-compatible re-exports across all provider schemas and fetchers.
+- **Strict DSH Theme Variables**:
+  - Replaced all standalone `rgba(...)` and hex color literals in client styles with native DSH CSS design tokens (`--dsw-alias-bg-*`, `--dsw-alias-border-*`, `--dsw-alias-label-*`, `--dsw-alias-state-*`), ensuring pixel-perfect dark and light theme switching.
+- **UI Chevron Standard**:
+  - Integrated DSH core chevron primitive `IconChevronDownOutline14` from `@deepseek-ai/dsh-client-ui-primitives` with graceful SVG fallback and CSS rotation animations.
+- **Namespace & Route Isolation**:
+  - Disambiguated `SETTINGS_NS = 'dsh-key-limits'` (matching DSH settings slot) and `ROUTE_PREFIX = '/dsh-key-limits'` (HTTP routes prefix).
+- **Localization Standard**:
+  - Fully purged hardcoded Russian strings and internal `KL_ru` dictionary from codebase; runtime Russian translation is managed cleanly by `dsh-russian-lang`.
+- **Security Sanitization & Publication Layer**:
+  - Untracked internal development files (`AGENTS.md`, `index.md`, `docs/TZ.md`, plans, staging deploy scripts) from git index and configured `.gitignore` and `.gitattributes`.
+  - Added `publish.sh` reproducible publication layer using git plumbing for clean fast-forward pushes to public GitHub repository.
+- **Repository Canonical Relocation**:
+  - Relocated repository to `/mnt/external/Project/DEV/dhsplugins/dsh-key-limits` per `dhs-plugin-release-workflow`.
+- **Test Suite Expansion**:
+  - Expanded unit test suite from 24 to 49 comprehensive tests, including true VM behavioral locale collision testing, card ordering, and offline parser mocks for all 9 providers.
+
 ## 0.1.10
 
 - **Public Package Transition**:
