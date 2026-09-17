@@ -289,7 +289,7 @@ function AllLimitsModal(props){
                     className: "kl-panelTitle",
                     children: [
                       klT("allTitle"),
-                      jsx("span", { className: "kl-countBadge", children: subs.length ? subs.length + " активных" : "0" })
+                      jsx("span", { className: "kl-countBadge", children: subs.length ? subs.length + klT("activeBadge") : "0" })
                     ]
                   })
                 ]
@@ -306,7 +306,7 @@ function AllLimitsModal(props){
                   jsxs("div", {
                     className: "kl-statCard",
                     children: [
-                      jsx("div", { className: "kl-statLabel", children: klT("totalAccounts") || "Всего аккаунтов" }),
+                      jsx("div", { className: "kl-statLabel", children: klT("totalAccounts") }),
                       jsxs("div", {
                         className: "kl-statVal",
                         children: [
@@ -319,7 +319,7 @@ function AllLimitsModal(props){
                   jsxs("div", {
                     className: "kl-statCard",
                     children: [
-                      jsx("div", { className: "kl-statLabel", children: "Мин. остаток" }),
+                      jsx("div", { className: "kl-statLabel", children: klT("minRemaining") }),
                       jsx("div", {
                         className: "kl-statVal",
                         style: { color: worstQuota != null ? (worstQuota <= DANGER ? "#ef4444" : (worstQuota <= WARN ? "#f59e0b" : "#10b981")) : "inherit" },
@@ -330,7 +330,7 @@ function AllLimitsModal(props){
                   jsxs("div", {
                     className: "kl-statCard",
                     children: [
-                      jsx("div", { className: "kl-statLabel", children: "Баланс ($)" }),
+                      jsx("div", { className: "kl-statLabel", children: klT("balanceUsd") }),
                       jsx("div", { className: "kl-statVal", style: { color: "#38bdf8" }, children: "$" + totalBalUSD.toFixed(2) })
                     ]
                   })
@@ -347,19 +347,19 @@ function AllLimitsModal(props){
                         type: "button",
                         className: "kl-tabBtn " + (state.tab === "all" ? "active" : ""),
                         onClick: function(){ setSt(function(s){ return Object.assign({}, s, { tab: "all" }); }); },
-                        children: "Все (" + subs.length + ")"
+                        children: klT("tabAll") + " (" + subs.length + ")"
                       }),
                       jsx("button", {
                         type: "button",
                         className: "kl-tabBtn " + (state.tab === "quota" ? "active" : ""),
                         onClick: function(){ setSt(function(s){ return Object.assign({}, s, { tab: "quota" }); }); },
-                        children: "Квоты (" + quotaCount + ")"
+                        children: klT("tabQuotas") + " (" + quotaCount + ")"
                       }),
                       jsx("button", {
                         type: "button",
                         className: "kl-tabBtn " + (state.tab === "balance" ? "active" : ""),
                         onClick: function(){ setSt(function(s){ return Object.assign({}, s, { tab: "balance" }); }); },
-                        children: "Балансы (" + balCount + ")"
+                        children: klT("tabBalances") + " (" + balCount + ")"
                       })
                     ]
                   }),
@@ -383,7 +383,7 @@ function AllLimitsModal(props){
                 children: [
                   jsx(SvgKey, { size: 36, style: { color: "rgba(255,255,255,0.2)" } }),
                   jsx("div", { className: "kl-emptyTitle", children: klT("noSubs") }),
-                  jsx("div", { className: "kl-emptyText", children: "Добавьте ключи и токены провайдеров в настройках плагина, чтобы отслеживать актуальные квоты и балансы." })
+                  jsx("div", { className: "kl-emptyText", children: klT("emptySettingsHint") })
                 ]
               }) : null,
 
