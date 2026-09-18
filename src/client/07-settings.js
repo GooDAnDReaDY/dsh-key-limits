@@ -301,6 +301,25 @@ try {
   ChevronIcon = null;
 }
 
+// Bare settings form. The row seat page (plugins.row.config) draws its own
+// title, icon, crumb and padding around the entry, so this component must not
+// add a card of its own — a second frame doubles the border and shifts the
+// block out of the page's content area.
+function KeyLimitsSettingsForm(props){
+  var ctx=(props&&props.ctx)||klCtx;
+  var lang=useActiveLocale(ctx),
+      dict=lang==="zh"?KL_zh:KL_en,
+      t=(typeof props.t==="function")?props.t:makeT(dict,KL_en);
+  return jsxs("div",{className:"kl-page",children:[
+    jsx(ConfigFields,{ctx:ctx,t:t}),
+    jsx(KeysSettingsBody,{}),
+    jsx(UpdaterSection,{ctx:ctx,t:t})
+  ]});
+}
+
+// View-aware entry for every seat this plugin can land in. Hooks run before any
+// branch so the hook order stays stable whether the host asks for the summary
+// one-liner or the full page.
 function KeyLimitsPluginCard(props){
   var ctx = (props && props.ctx) || klCtx;
   var lang = useActiveLocale(ctx),
@@ -309,6 +328,12 @@ function KeyLimitsPluginCard(props){
       st = useState(false),
       open = st[0],
       setOpen = st[1];
+  if(props && props.view === "summary"){
+    return jsx("div",{className:"kl-sub",children:t("subtitle")});
+  }
+  if(props && props.view === "page"){
+    return jsx(KeyLimitsSettingsForm,{ctx:ctx,t:t});
+  }
   return jsxs("li",{className:"kl-item",children:[
     jsxs("button",{type:"button",className:"kl-head","aria-expanded":!!open,onClick:function(){setOpen(!open)},children:[
       jsxs("div",{className:"kl-grow",children:[
@@ -338,8 +363,28 @@ function registerKeyLimitsSettings(ctx){
     return function () { undo.forEach(function (off) { off() }) }
   }, "key-limits: locale");
   function loc(){return useActiveLocale(ctx)}
-  // #11: plugin.item only — no settings.section fallback
-  ctx.slots.inject("settings.plugin.item",function(){
+  // Register into the seats the host actually renders, newest first:
+  // - 'plugins.row.config' — the plugin's own row on the Plugins page
+  //   (DSH 0.1.6-alpha.2): keyed '<package name>#<row id from cordis.patch.yml>'.
+  //   The row gains a configure control that opens the entry's page, and the
+  //   page asks for view:'summary' and view:'page'.
+  // - 'settings.plugin.item' (#11) — older cores' Settings > Plugins card slot,
+  //   kept as a fallback. It is NOT rendered by the current core, so it must
+  //   never be the only seat.
+  function trySlot(name, register){
+    try{
+      if(typeof ctx.slots.inject==="function")ctx.slots.inject(name,register);
+      else register();
+    }catch(e){
+      if(ctx.logger&&typeof ctx.logger.warn==="function")ctx.logger.warn("[dsh-key-limits] slot registration failed for "+name+": "+(e&&e.message));
+    }
+  }
+  trySlot("plugins.row.config",function(){
+    return ctx.slots.register({name:"plugins.row.config",key:ROW_CONFIG_KEY,locale:NS,inject:function(){return{ctx}}},function(p){
+      return jsx(KeyLimitsPluginCard,{...p,locale:loc()});
+    });
+  });
+  trySlot("settings.plugin.item",function(){
     return ctx.slots.register({name:"settings.plugin.item",key:NS,locale:NS,inject:function(){return{ctx}}},function(p){
       return jsx(KeyLimitsPluginCard,{...p,locale:loc()});
     });
