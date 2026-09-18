@@ -1,5 +1,5 @@
 /* prelude */
-var module={exports:{}},exports=module.exports,React=require("react"),ReactDOM=require("react-dom/client"),createPortal=require("react-dom").createPortal,jsx=require("react/jsx-runtime").jsx,jsxs=require("react/jsx-runtime").jsxs,useState=React.useState,useEffect=React.useEffect,useCallback=React.useCallback,useRef=React.useRef,API="/dsh-key-limits",NS="dsh-key-limits",REFRESH_MS=60000,WARN=30,DANGER=15,POS_KEY="kl-chip-pos",klCtx=null;
+var module={exports:{}},exports=module.exports,React=require("react"),ReactDOM=require("react-dom/client"),createPortal=require("react-dom").createPortal,jsx=require("react/jsx-runtime").jsx,jsxs=require("react/jsx-runtime").jsxs,useState=React.useState,useEffect=React.useEffect,useCallback=React.useCallback,useRef=React.useRef,API="/dsh-key-limits",NS="dsh-key-limits",PKG="@goodandready/dsh-key-limits",ROW_ID="dsh-key-limits",ROW_CONFIG_KEY=PKG+"#"+ROW_ID,REFRESH_MS=60000,WARN=30,DANGER=15,POS_KEY="kl-chip-pos",klCtx=null;
 
 var css = `
 @keyframes kl-fade-in { from { opacity: 0; } to { opacity: 1; } }
@@ -579,6 +579,14 @@ var css = `
   border-top: 1px solid var(--dsw-alias-border-l2);
   margin: 0 16px;
   padding: 12px 0 16px;
+}
+/* Row seat page (plugins.row.config): the host page draws the title, icon and
+   crumb and provides its own padding, so the form renders bare — no card
+   chrome, no border, only the vertical rhythm between its own sections. */
+.kl-page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 `;
 

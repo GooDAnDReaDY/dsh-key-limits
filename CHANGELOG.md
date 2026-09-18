@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.2.1
+
+- **Settings on the plugin's own page**: the client registers the settings surface
+  into the Plugins page row seat, `plugins.row.config`, keyed
+  `@goodandready/dsh-key-limits#dsh-key-limits`. The plugin's row gains a configure
+  control whose page is the settings form (`view: 'page'`, rendered bare — the host
+  page draws the title, icon, crumb and padding), with a one-line state under the
+  title (`view: 'summary'`). The current DSH core does not render the legacy
+  `settings.plugin.item` seat at all, which is why the card was unreachable; that
+  seat stays registered as a fallback for older cores (#43).
+- New guard `test/row-seat.test.mjs`: the row key is checked against the package
+  name and the row id in `cordis.patch.yml`, the legacy seat must stay registered,
+  and the page view must render without the card wrapper.
+
 ## 0.2.0
 
 - **Architecture Decomposition**:
