@@ -364,13 +364,16 @@ function registerKeyLimitsSettings(ctx){
   }, "key-limits: locale");
   function loc(){return useActiveLocale(ctx)}
   // Register into the seats the host actually renders, newest first:
-  // - 'plugins.row.config' — the plugin's own row on the Plugins page
-  //   (DSH 0.1.6-alpha.2): keyed '<package name>#<row id from cordis.patch.yml>'.
-  //   The row gains a configure control that opens the entry's page, and the
-  //   page asks for view:'summary' and view:'page'.
+  // - 'plugins.item' — the plugin-LIST seat and the one the current core
+  //   (0.1.6-alpha.2) renders as the plugin's own page with its configuration
+  //   (the host draws the title, icon, crumb and padding and asks for view
+  //   'summary' or view 'page'). The label must stay a static string: it is
+  //   resolved while the page renders, and a locale lookup there would take the
+  //   whole client batch down with it.
+  // - 'plugins.row.config' — the plugin's own row on the Plugins page, keyed
+  //   '<package name>#<row id from cordis.patch.yml>', kept as a fallback.
   // - 'settings.plugin.item' (#11) — older cores' Settings > Plugins card slot,
-  //   kept as a fallback. It is NOT rendered by the current core, so it must
-  //   never be the only seat.
+  //   kept as a fallback. It is NOT rendered by the current core.
   function trySlot(name, register){
     try{
       if(typeof ctx.slots.inject==="function")ctx.slots.inject(name,register);
@@ -379,6 +382,11 @@ function registerKeyLimitsSettings(ctx){
       if(ctx.logger&&typeof ctx.logger.warn==="function")ctx.logger.warn("[dsh-key-limits] slot registration failed for "+name+": "+(e&&e.message));
     }
   }
+  trySlot("plugins.item",function(){
+    return ctx.slots.register({name:"plugins.item",id:ROW_ID,order:60,label:function(){return "Key Limits"},locale:NS,inject:function(){return{ctx}}},function(p){
+      return jsx(KeyLimitsPluginCard,{...p,locale:loc()});
+    });
+  });
   trySlot("plugins.row.config",function(){
     return ctx.slots.register({name:"plugins.row.config",key:ROW_CONFIG_KEY,locale:NS,inject:function(){return{ctx}}},function(p){
       return jsx(KeyLimitsPluginCard,{...p,locale:loc()});
