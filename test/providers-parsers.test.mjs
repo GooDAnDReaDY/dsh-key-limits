@@ -17,6 +17,7 @@ import {
   fetchQwenQuota,
   fetchOpenCodeGoQuota,
   clearSubCache,
+  setProviderLogger,
 } from '../lib/provider-fetchers.js'
 
 test('parseOpenCodeWorkspaceId parses diverse workspace URLs and bare IDs', () => {
@@ -265,3 +266,32 @@ test('fetchCommandCodeQuota parses 5h, weekly, and monthly windows correctly', a
     globalThis.fetch = originalFetch
   }
 })
+
+test('setProviderLogger captures provider error and prevents leaking secrets (#50)', async () => {
+  const logs = []
+  const mockLogger = {
+    warn: (msg) => logs.push(msg),
+  }
+  setProviderLogger(mockLogger)
+  try {
+    const originalFetch = globalThis.fetch
+    globalThis.fetch = async () => {
+      throw new Error('connection reset by peer')
+    }
+    try {
+      const secret = 'sk-super-secret-key-12345'
+      const res = await fetchDeepSeekBalance(secret)
+      assert.equal(res.status, 'error')
+      assert.ok(logs.length > 0, 'Logger should have captured warning')
+      for (const log of logs) {
+        assert.ok(!log.includes(secret), 'Log must NEVER contain the secret key')
+        assert.ok(log.includes('[dsh-key-limits]'), 'Log should have plugin namespace prefix')
+      }
+    } finally {
+      globalThis.fetch = originalFetch
+    }
+  } finally {
+    setProviderLogger(null)
+  }
+})
+
