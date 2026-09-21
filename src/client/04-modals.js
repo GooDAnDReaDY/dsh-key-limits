@@ -162,9 +162,9 @@ function AllLimitsModal(props){
     var q = refresh ? "?refresh=1" : "";
     if (refresh) setSt(function(s){ return Object.assign({}, s, { refreshing: true }); });
     Promise.all([
-      fetch(API + "/config", { cache: "no-store" }).then(function(r){ return r.json(); }).catch(function(){ return {}; }),
-      fetch(API + "/subs" + q, { cache: "no-store" }).then(function(r){ return r.json(); }),
-      fetch(API + "/active-sub?sessionId=" + encodeURIComponent(sessionIdFromCtx()), { cache: "no-store" }).then(function(r){ return r.json(); }).catch(function(){ return null; })
+      fetchWithTimeout(API + "/config", { cache: "no-store" }).then(function(r){ return r.json(); }).catch(function(){ return {}; }),
+      fetchWithTimeout(API + "/subs" + q, { cache: "no-store" }).then(function(r){ return r.json(); }),
+      fetchWithTimeout(API + "/active-sub?sessionId=" + encodeURIComponent(sessionIdFromCtx()), { cache: "no-store" }).then(function(r){ return r.json(); }).catch(function(){ return null; })
     ]).then(function(res){
       var cfg = res[0] || {};
       var j = res[1] || {};
@@ -200,7 +200,7 @@ function AllLimitsModal(props){
 
   function refreshOne(id){
     setSt(function(s){ return Object.assign({}, s, { refreshing: true }); });
-    fetch(API + "/subs?refresh=1&id=" + encodeURIComponent(id), { cache: "no-store" })
+    fetchWithTimeout(API + "/subs?refresh=1&id=" + encodeURIComponent(id), { cache: "no-store" })
       .then(function(r){ return r.json(); })
       .then(function(j){
         setSt(function(s){
@@ -224,7 +224,7 @@ function AllLimitsModal(props){
 
   function deleteOne(id, label){
     if (!confirm(klT("deleteConfirm") + label + "»?")) return;
-    fetch(API + "/subs?id=" + encodeURIComponent(id), { method: "DELETE" })
+    fetchWithTimeout(API + "/subs?id=" + encodeURIComponent(id), { method: "DELETE" })
       .then(function(){ load(false); })
       .catch(function(e){
         setSt(function(s){
