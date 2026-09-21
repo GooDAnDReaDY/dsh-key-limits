@@ -123,3 +123,27 @@ test('inferProviderFromSub handles id suffixes and sub objects', () => {
   assert.equal(inferProviderFromSub({ id: 'commandcode' }), 'commandcode')
   assert.equal(inferProviderFromSub(null), '')
 })
+
+test('sortSubscriptions integrates with buildSubsList ordering contract (#48)', () => {
+  const rawList = [
+    { id: 'sub-1', label: 'First', provider: 'deepseek' },
+    { id: 'sub-2', label: 'Second', provider: 'qwen' },
+    { id: 'sub-3', label: 'Third', provider: 'openrouter' },
+  ]
+  // With custom order and active account pinned
+  const sorted = sortSubscriptions(rawList, {
+    order: ['sub-2', 'sub-3', 'sub-1'],
+    activeOnTop: true,
+    activeSubId: 'sub-3',
+  })
+  assert.deepEqual(sorted.map((s) => s.id), ['sub-3', 'sub-2', 'sub-1'])
+
+  // When activeOnTop is false
+  const noPin = sortSubscriptions(rawList, {
+    order: ['sub-2', 'sub-3', 'sub-1'],
+    activeOnTop: false,
+    activeSubId: 'sub-3',
+  })
+  assert.deepEqual(noPin.map((s) => s.id), ['sub-2', 'sub-3', 'sub-1'])
+})
+
