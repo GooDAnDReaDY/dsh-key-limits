@@ -602,3 +602,24 @@ function ensureKeyLimitsStyles(){
   return function(){tag.remove()};
 }
 ensureKeyLimitsStyles();
+
+var DEFAULT_CLIENT_TIMEOUT_MS = 15000;
+function fetchWithTimeout(url, opts, timeoutMs) {
+  var ms = typeof timeoutMs === "number" ? timeoutMs : DEFAULT_CLIENT_TIMEOUT_MS;
+  var options = opts || {};
+  if (options.signal) {
+    return fetch(url, options);
+  }
+  if (typeof AbortController !== "undefined") {
+    var controller = new AbortController();
+    var timer = setTimeout(function() {
+      try { controller.abort(); } catch(e) {}
+    }, ms);
+    var newOpts = Object.assign({}, options, { signal: controller.signal });
+    return fetch(url, newOpts).finally(function() {
+      clearTimeout(timer);
+    });
+  }
+  return fetch(url, options);
+}
+

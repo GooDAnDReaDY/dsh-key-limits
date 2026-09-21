@@ -4,7 +4,7 @@ function AddKeyModal(props){
   var st=useState({loading:true,schemas:{},provider:"",label:"",secret:"",extra:"",err:"",saving:false});
   var s=st[0],setSt=st[1];
   useEffect(function(){
-    fetch(API+"/config",{cache:"no-store"}).then(function(r){return r.json()}).then(function(cfg){
+    fetchWithTimeout(API+"/config",{cache:"no-store"}).then(function(r){return r.json()}).then(function(cfg){
       var sc=cfg.schemas||{};
       var first=Object.keys(sc)[0]||"";
       setSt(function(x){return Object.assign({},x,{loading:false,schemas:sc,provider:first})});
@@ -19,7 +19,7 @@ function AddKeyModal(props){
       return;
     }
     setSt(function(x){return Object.assign({},x,{saving:true,err:""})});
-    fetch(API+"/subs",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({provider:s.provider,secret:s.secret,extra:s.extra,label:s.label})}).then(function(r){return r.json()}).then(function(j){
+    fetchWithTimeout(API+"/subs",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({provider:s.provider,secret:s.secret,extra:s.extra,label:s.label})}).then(function(r){return r.json()}).then(function(j){
       if(j.error){setSt(function(x){return Object.assign({},x,{saving:false,err:j.error})});return}
       onSaved&&onSaved();onClose&&onClose();
     }).catch(function(e){setSt(function(x){return Object.assign({},x,{saving:false,err:String(e&&e.message||e)||klT("saveError")})})});
@@ -79,14 +79,14 @@ function KeysInlineList(){
   var st=useState({loading:true,subscriptions:[],refreshing:false,err:""});
   var state=st[0],setSt=st[1];
   function load(refresh){
-    fetch(API+"/subs"+(refresh?"?refresh=1":""),{cache:"no-store"}).then(function(r){return r.json()}).then(function(j){
+    fetchWithTimeout(API+"/subs"+(refresh?"?refresh=1":""),{cache:"no-store"}).then(function(r){return r.json()}).then(function(j){
       setSt({loading:false,subscriptions:j.subscriptions||[],refreshing:!!j.refreshing,err:""});
     }).catch(function(e){setSt(function(s){return Object.assign({},s,{loading:false,err:String(e&&e.message||e)})})});
   }
   useEffect(function(){load(false)},[]);
   function del(id,label){
     if(!confirm(klT("deleteConfirm")+label+"»?"))return;
-    fetch(API+"/subs?id="+encodeURIComponent(id),{method:"DELETE"}).then(function(){load(false)});
+    fetchWithTimeout(API+"/subs?id="+encodeURIComponent(id),{method:"DELETE"}).then(function(){load(false)});
   }
   return jsxs("div",{children:[
     jsxs("div",{className:"kl-toolbar",style:{marginBottom:10},children:[
@@ -101,7 +101,7 @@ function KeysInlineList(){
       jsx("div",{children:klT("noSubs")})
     ]}):null,
     jsx("div",{className:"kl-list",children:state.subscriptions.map(function(s){
-      return jsx(SubCard,{key:s.id,sub:s,busy:state.refreshing,onRefresh:function(id){fetch(API+"/subs?refresh=1&id="+encodeURIComponent(id),{cache:"no-store"}).then(function(){load(false)})},onDelete:del});
+      return jsx(SubCard,{key:s.id,sub:s,busy:state.refreshing,onRefresh:function(id){fetchWithTimeout(API+"/subs?refresh=1&id="+encodeURIComponent(id),{cache:"no-store"}).then(function(){load(false)})},onDelete:del});
     })}),
     state.err?jsxs("div",{className:"kl-alertError",children:[jsx(SvgAlert,{}),jsx("span",{children:state.err})]}):null
   ]});
@@ -133,7 +133,7 @@ function ConfigFields(props){
     var cancelled = false;
     Promise.all([
       Promise.resolve(scope.get()),
-      fetch(API + "/subs", { cache: "no-store" }).then(function(r){ return r.json(); }).catch(function(){ return {}; })
+      fetchWithTimeout(API + "/subs", { cache: "no-store" }).then(function(r){ return r.json(); }).catch(function(){ return {}; })
     ]).then(function(res){
       if (cancelled) return;
       var snap = res[0];
@@ -238,7 +238,7 @@ function UpdaterSection(props){
 
   function check(){
     setSt(function(x){ return Object.assign({}, x, { checking: true, error: "", notice: "" }); });
-    fetch(API + "/update", { cache: "no-store" })
+    fetchWithTimeout(API + "/update", { cache: "no-store" })
       .then(function(res){
         if (!res.ok) throw new Error("HTTP " + res.status);
         return res.json();
@@ -254,10 +254,10 @@ function UpdaterSection(props){
   function triggerUpdate(){
     if (s.updating) return;
     setSt(function(x){ return Object.assign({}, x, { updating: true, error: "", notice: "" }); });
-    fetch(API + "/update", {
+    fetchWithTimeout(API + "/update", {
       method: "POST",
       headers: { "x-dsh-plugin-update": "1" }
-    })
+    }, 60000)
       .then(function(res){ return res.json(); })
       .then(function(resData){
         if (resData.error) throw new Error(resData.error);

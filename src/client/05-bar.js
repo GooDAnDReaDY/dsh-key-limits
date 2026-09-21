@@ -10,7 +10,7 @@ function ActiveKeyButton(props){
   var data=st[0].data,loading=st[0].loading,open=st[0].open,setSt=st[1];
   var load=useCallback(function(){
     if(!sessionId){setSt(function(s){return{loading:false,data:null,open:s.open}});return}
-    fetch(API+"/active-sub?sessionId="+encodeURIComponent(sessionId),{cache:"no-store"}).then(function(r){return r.json()}).then(function(j){
+    fetchWithTimeout(API+"/active-sub?sessionId="+encodeURIComponent(sessionId),{cache:"no-store"}).then(function(r){return r.json()}).then(function(j){
       setSt(function(s){return{loading:false,data:j,open:s.open}});
     }).catch(function(){setSt(function(s){return{loading:false,data:null,open:s.open}})});
   },[sessionId]);

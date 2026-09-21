@@ -19,10 +19,10 @@ function FloatChip(){
   var lastPosRef=useRef(pos[0]);
   useEffect(function(){
     function pull(){
-      fetch(API+"/config",{cache:"no-store"}).then(function(r){return r.json()}).then(function(cfg){
+      fetchWithTimeout(API+"/config",{cache:"no-store"}).then(function(r){return r.json()}).then(function(cfg){
         var on=!(cfg.ui&&cfg.ui.floatChip===false);
         if(!on){setSt(function(s){return Object.assign({},s,{enabled:false})});return}
-        fetch(API+"/subs",{cache:"no-store"}).then(function(r){return r.json()}).then(function(j){
+        fetchWithTimeout(API+"/subs",{cache:"no-store"}).then(function(r){return r.json()}).then(function(j){
           var subs=j.subscriptions||[],wMin=null,n=subs.length;
           for(var i=0;i<subs.length;i++){
             var w=(subs[i].quota&&subs[i].quota.windows)||[];
