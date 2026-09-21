@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.3
+
+- **Account Ordering & Clean Exports (Stage 1)**:
+  - Fixed account ordering in UI by wiring `sortSubscriptions` to `buildSubsList` in `lib/cards.js`, ensuring deterministic sorting by status, reset date, and quota pressure across float chips, composer bars, and settings cards (#48).
+  - Encapsulated internal helper `cardFromRefresh` inside `lib/cards.js` by removing it from exports (#54).
+- **Backend Observability & Error Logging (Stage 2)**:
+  - Added safe error logging to host background refresh routines and JSON body parser in `lib/index.js` instead of silently ignoring failures (#52).
+  - Enhanced observability across provider adapters and subscription store with safe credential redaction via `setProviderLogger` (#50).
+- **Architecture Decomposition & Internal Documentation (Stage 3)**:
+  - Extracted shared HTTP utilities (`readQuery`, `readJsonBody`, `json`, `toCredentialRef`, `defaultCredRef`) into dedicated `lib/http-utils.js` module, reducing `lib/index.js` apply facade complexity (#51).
+  - Documented internal test exports in `lib/plugin-updater.js` with clear comments explaining their usage in test fixtures (#55).
+- **Client Network Robustness & Parity Guard (Stage 4)**:
+  - Hardened client networking in `src/client/03-network.js` by replacing bare `fetch` calls with `fetchWithTimeout` (10-second default timeout with `AbortController`), preventing UI deadlocks on network stalls (#49).
+  - Added build parity guard `test/build-parity.test.mjs` verifying that `lib/client.js` stays strictly synchronized with `src/client/*.js` bundle sources (#53).
+
 ## 0.2.2
 
 - **Settings reachable again on the plugin's own page**: the surface is now registered
