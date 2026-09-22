@@ -124,8 +124,8 @@ function ConfigFields(props){
   });
   var s = st[0], setSt = st[1];
   var scopeRef = useRef(null);
-  if (!scopeRef.current && ctx && ctx.settingsScope && ctx.settingsScope.bind) {
-    try { scopeRef.current = ctx.settingsScope.bind({ namespace: "dsh-key-limits" }); } catch (e) { scopeRef.current = null; }
+  if (!scopeRef.current && ctx && ctx.configForms && ctx.configForms.get) {
+    try { scopeRef.current = ctx.configForms.get("dsh-key-limits"); } catch (e) { scopeRef.current = null; }
   }
   useEffect(function(){
     var scope = scopeRef.current;
@@ -167,7 +167,7 @@ function ConfigFields(props){
 
   function save(){
     var scope = scopeRef.current;
-    if (!scope) { setSt(function(x){ return Object.assign({}, x, { msg: "settingsScope unavailable" }); }); return; }
+    if (!scope) { setSt(function(x){ return Object.assign({}, x, { msg: "configForms unavailable" }); }); return; }
     setSt(function(x){ return Object.assign({}, x, { saving: true, msg: "" }); });
     var payload = {
       storageDir: String(s.storageDir || ""),
@@ -187,7 +187,7 @@ function ConfigFields(props){
   }
 
   if (s.status === "loading") return jsx("div",{className:"kl-meta",children:t("loading")});
-  if (s.status === "unavailable") return jsx("div",{className:"kl-meta",children:"settingsScope unavailable"});
+  if (s.status === "unavailable") return jsx("div",{className:"kl-meta",children:"configForms unavailable"});
 
   return jsxs("div",{style:{marginBottom:16,paddingBottom:12,borderBottom:"1px solid var(--dsw-alias-border-l2)"},children:[
     jsxs("div",{className:"kl-field",children:[jsx("div",{className:"kl-fieldLabel",children:t("storageDir")}),jsx("input",{className:"kl-input",value:s.storageDir,onChange:function(e){setSt(function(x){return Object.assign({},x,{storageDir:e.target.value})})}})]}),

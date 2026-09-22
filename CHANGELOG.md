@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.4
+
+### Fixed
+- Settings no longer wait on the removed settingsScope service. The client uses configForms (#61).
+
 ## 0.2.3
 
 - **Account Ordering & Clean Exports (Stage 1)**:

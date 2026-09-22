@@ -13,7 +13,7 @@ test('build parity: lib/client.js matches src/client compilation exactly (#53)',
     .filter(Boolean)
   const PKG = '@goodandready/dsh-key-limits'
   const header = `window.__ModuleLoader__.load({id:"${PKG}",factory:(require)=>{`
-  const footer = `exports.apply=apply;exports.inject=["slots","sessions","locale","settingsScope"];return module.exports}})`
+  const footer = `exports.apply=apply;exports.inject=["slots","sessions","locale","configForms"];return module.exports}})`
 
   let body = ''
   for (const file of order) {
