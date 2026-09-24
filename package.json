@@ -1,6 +1,6 @@
 {
   "name": "@goodandready/dsh-key-limits",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "DeepSeek Harness plugin: API key / subscription quota limits (float chip, composer bar, settings).",
   "type": "module",
   "main": "lib/index.js",
