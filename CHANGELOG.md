@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.5
+
+### Security
+- **Cross-site request forgery (CSRF) defense for subscription endpoints (#60)**:
+  - Added `isTrustedSettingsRequest` in `lib/http-utils.js` verifying `Sec-Fetch-Site` and validating `Origin`/`Referer` against `Host` and `X-Forwarded-Host`.
+  - Guarded `POST /dsh-key-limits/subs` to prevent unauthorized cross-site credential writing before `credentials.set` is reached.
+  - Guarded `DELETE /dsh-key-limits/subs`, `GET /dsh-key-limits/subs`, and `GET /dsh-key-limits/active-sub` to reject cross-site requests with `403 Forbidden`.
+  - Added comprehensive automated test suite `test/trusted-subs-request.test.mjs` verifying that cross-site requests are rejected and never mutate credentials or storage.
+
 ## 0.2.4
 
 ### Fixed
