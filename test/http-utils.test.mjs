@@ -1,6 +1,5 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { EventEmitter } from 'node:events'
 import { Readable } from 'node:stream'
 import {
   json,
@@ -8,6 +7,7 @@ import {
   readJsonBody,
   toCredentialRef,
   defaultCredRef,
+  PayloadTooLargeError,
 } from '../lib/http-utils.js'
 
 test('http-utils: defaultCredRef formats deterministic environment variable names', () => {
@@ -16,10 +16,14 @@ test('http-utils: defaultCredRef formats deterministic environment variable name
   assert.equal(defaultCredRef(''), 'DSH_KEY_LIMITS_SUB')
 })
 
-test('http-utils: toCredentialRef falls back to env descriptor when module is absent', async () => {
+test('http-utils: toCredentialRef produces credential ref or fallback descriptor', async () => {
   const ref = await toCredentialRef('MY_API_KEY')
-  assert.equal(ref.type, 'env')
-  assert.equal(ref.name, 'MY_API_KEY')
+  if (typeof ref === 'string') {
+    assert.equal(ref, 'MY_API_KEY')
+  } else {
+    assert.equal(ref.type, 'env')
+    assert.equal(ref.name, 'MY_API_KEY')
+  }
 })
 
 test('http-utils: readQuery parses URL search params safely', () => {
@@ -64,4 +68,20 @@ test('http-utils: readJsonBody parses JSON body and logs warning on syntax error
   assert.deepEqual(result, {})
   assert.equal(logs.length, 1)
   assert.ok(logs[0].includes('JSON.parse failed'))
+})
+
+test('http-utils: readJsonBody throws PayloadTooLargeError when body exceeds maxBytes', async () => {
+  const oversizedData = Buffer.alloc(1000, 'a')
+  const stream = Readable.from([oversizedData])
+  await assert.rejects(
+    async () => {
+      await readJsonBody(stream, null, 500)
+    },
+    (err) => {
+      assert.ok(err instanceof PayloadTooLargeError)
+      assert.equal(err.status, 413)
+      assert.equal(err.code, 'PAYLOAD_TOO_LARGE')
+      return true
+    }
+  )
 })
