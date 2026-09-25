@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.2.6
+
+### Security
+- **Fail-closed request source validation (#60)**:
+  - Enforced strict fail-closed source verification in `isTrustedSettingsRequest`: requires valid `Host` / `X-Forwarded-Host`, verifies `Origin`/`Referer`, rejects explicit `cross-site`, and requires a verified source indicator (`same-origin`, `same-site`, `none`, or explicit internal auth token `x-dsh-internal-auth: 1`).
+  - Requests missing source metadata or passing empty headers are denied with `403 Forbidden`.
+- **Bounded body reader & DoS mitigation (#64)**:
+  - Added `DEFAULT_MAX_BODY_BYTES = 64 * 1024` (64 KB) limit and `PayloadTooLargeError` to `readJsonBody`.
+  - Enforced streaming size limit on `POST /dsh-key-limits/subs`, rejecting oversized bodies with `413 Payload Too Large` without mutating credentials or storage.
+- **Opaque health route (#65)**:
+  - Removed host absolute storage path (`storageDir`) from `GET /dsh-key-limits/health` response, returning clean status `{ ok: true, name:  dsh-key-limits, status: healthy }`.
+- **Credential scrubbing in subs.json (#12)**:
+  - Enforced `secret: '` in `CredentialStore._save()`, guaranteeing that plaintext secrets are never written to disk in `subs.json` and are solely stored in the DSH credentials service.
+
 ## 0.2.5
 
 ### Security
