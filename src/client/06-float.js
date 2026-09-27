@@ -31,8 +31,8 @@ function FloatChip(){
           }
           var text=n?(wMin!=null?fmtPct(wMin):String(n)):klT("activeNone");
           setSt(function(s){return Object.assign({},s,{enabled:true,label:text,worst:wMin})});
-        }).catch(function(){});
-      }).catch(function(){});
+        }).catch(function(){/* best-effort: transient /subs poll failure ignored */});
+      }).catch(function(){/* best-effort: transient /config poll failure ignored */});
     }
     pull();var t=setInterval(pull,REFRESH_MS);return function(){clearInterval(t)};
   },[]);
@@ -53,7 +53,7 @@ function FloatChip(){
         drag.current.active=false;
         var cp=lastPosRef.current;
         if(cp)savePos(cp.x,cp.y);
-        try{e.currentTarget.releasePointerCapture(e.pointerId)}catch(err){}
+        try{e.currentTarget.releasePointerCapture(e.pointerId)}catch(err){/* best-effort: pointer capture might have already been released */}
       },
       children:jsxs("div",{title:klT("floatTitle"),className:floatCls,
         onPointerDown:function(e){

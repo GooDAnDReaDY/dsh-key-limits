@@ -1,22 +1,22 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import vm from "node:vm";
 
-function fmtReset(resetsAt) {
-  if (!resetsAt) return "";
-  var t = typeof resetsAt === "number" ? resetsAt : Date.parse(resetsAt);
-  if (!Number.isFinite(t)) return "";
-  var ms = t - Date.now();
-  if (ms <= 0) return "refresh";
-  var totalMinutes = Math.floor(ms / 60000);
-  var totalHours = Math.floor(totalMinutes / 60);
-  var m = totalMinutes % 60;
-  if (totalHours < 24) {
-    return (totalHours ? totalHours + "h " : "") + m + "m";
-  }
-  var d = Math.floor(totalHours / 24);
-  var h = totalHours % 24;
-  return d + "d " + (h ? h + "h " : "") + m + "m";
-}
+const formatJs = readFileSync(new URL("../src/client/03-format.js", import.meta.url), "utf8");
+const sandbox = {
+  klT: (key) => key,
+  Date,
+  Math,
+  Number,
+  String,
+  JSON,
+  localStorage: { getItem: () => null, setItem: () => {} },
+};
+vm.createContext(sandbox);
+vm.runInContext(formatJs + "\n;globalThis.__format_exports = { fmtReset, fmtPct, minRemaining, pctClass, floatPctClass };", sandbox);
+const { fmtReset, fmtPct, minRemaining, pctClass, floatPctClass } = sandbox.__format_exports;
 
 test("fmtReset handles numeric millisecond timestamp under 24 hours", () => {
   const inTwoHours = Date.now() + 2 * 3600000 + 15 * 60000;
@@ -44,4 +44,11 @@ test("fmtReset returns empty string on null/empty", () => {
 
 test("fmtReset returns refresh if already expired", () => {
   assert.equal(fmtReset(Date.now() - 5000), "refresh");
+});
+
+test("fmtPct and minRemaining format percentages accurately from production module", () => {
+  assert.equal(fmtPct(42.3), "42%");
+  assert.equal(fmtPct("invalid"), "—");
+  assert.equal(minRemaining([{ remainingPercent: 80 }, { remainingPercent: 35 }]), 35);
+  assert.equal(minRemaining([]), null);
 });

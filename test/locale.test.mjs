@@ -109,4 +109,5 @@ test('source code and tests contain no cyrillic characters', () => {
   check('lib/client.js')
   check('lib/subs.js')
   check('lib/provider-fetchers.js')
+  check('lib/provider-parsers.js')
 })
