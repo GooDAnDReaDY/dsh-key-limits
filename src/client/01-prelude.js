@@ -613,7 +613,7 @@ function fetchWithTimeout(url, opts, timeoutMs) {
   if (typeof AbortController !== "undefined") {
     var controller = new AbortController();
     var timer = setTimeout(function() {
-      try { controller.abort(); } catch(e) {}
+      try { controller.abort(); } catch(e) { /* best-effort: abort may fail if already completed or unmounted */ }
     }, ms);
     var newOpts = Object.assign({}, options, { signal: controller.signal });
     return fetch(url, newOpts).finally(function() {

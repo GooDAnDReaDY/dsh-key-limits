@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.7
+
+### Refactor & Quality
+- **Test production code directly (#67)**:
+  - Rewrote `test/format.test.mjs` to execute real `src/client/03-format.js` production implementation in an isolated VM sandbox, removing local duplicate copy of `fmtReset`. Added direct tests for `fmtPct` and `minRemaining`.
+- **Modular provider parsers & file size standard (#68)**:
+  - Extracted parsing, normalization, plan constants, and hashing helpers into new modular `lib/provider-parsers.js` (~240 lines).
+  - Reduced `lib/provider-fetchers.js` from 763 lines to 590 lines (comfortably below the 600-line DSH standard) while keeping complete backward-compatible exports.
+- **Client best-effort catch documentation (#69)**:
+  - Clarified and documented all 5 empty `catch`-blocks in `src/client/` (`01-prelude.js`, `03-format.js`, `06-float.js`) with explicit best-effort intention comments to prevent silent failures and ensure unmount/transient error safety.
+
 ## 0.2.6
 
 ### Security
