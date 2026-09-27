@@ -521,6 +521,65 @@ var css = `
 
 .kl-spinning { animation: kl-spin 0.9s linear infinite; }
 
+/* Pool Health & Predictive Analytics */
+.kl-pool-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--dsw-alias-bg-layer-2);
+  border: 1px solid var(--dsw-alias-border-l2);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--dsw-alias-label-secondary);
+}
+.kl-pool-ok { color: var(--dsw-alias-state-success); }
+.kl-pool-warn { color: var(--dsw-alias-state-warning); }
+.kl-pool-danger { color: var(--dsw-alias-state-danger); }
+
+.kl-burn-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--dsw-alias-bg-layer-3);
+  color: var(--dsw-alias-label-secondary);
+  border: 1px solid var(--dsw-alias-border-l2);
+}
+
+.kl-sparkline-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 100px;
+}
+.kl-sparkline {
+  overflow: visible;
+  display: block;
+}
+.kl-spark-stroke-ok {
+  stroke: var(--dsw-alias-state-success);
+}
+.kl-spark-stroke-warn {
+  stroke: var(--dsw-alias-state-warning);
+}
+.kl-spark-stroke-danger {
+  stroke: var(--dsw-alias-state-danger);
+}
+.kl-spark-area-ok {
+  fill: color-mix(in srgb, var(--dsw-alias-state-success) 14%, transparent);
+}
+.kl-spark-area-warn {
+  fill: color-mix(in srgb, var(--dsw-alias-state-warning) 14%, transparent);
+}
+.kl-spark-area-danger {
+  fill: color-mix(in srgb, var(--dsw-alias-state-danger) 14%, transparent);
+}
+
 /* Settings Plugin Card */
 .kl-item {
   list-style: none;

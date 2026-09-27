@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.2.8
+
+### Features & Predictive Analytics
+- **Pool Health Indicator (#71)**:
+  - Added `poolStats` analyzer computing total accounts, healthy count (active quota > 15%), warning count (15% .. 30%), and exhausted/errored accounts with per-provider breakdown.
+  - Added live Pool Health stat card in `AllLimitsModal` displaying healthy/total ratio and dynamic status dot indicator.
+- **Burn Rate & Velocity (#72)**:
+  - Added rolling timestamped usage snapshot recorder (`recordUsageSnapshot`) in browser `localStorage` capturing quota level snapshots over a 24-hour horizon.
+  - Added velocity calculation engine (`calcBurnRate`) estimating hourly consumption rate (`%/h`) and project time to depletion (`hours left`).
+  - Added Burn Rate metrics card in `AllLimitsModal`.
+- **Reset Countdown in Chip & Cards (#73)**:
+  - Added `findNearestReset` calculating the nearest impending quota replenishment across all registered accounts.
+  - Updated floating chip tooltip with dynamic countdown timer (`Resets in Xh Ym`).
+  - Added reset countdown tag on `SubCard` and modal headers.
+- **24-Hour Usage Sparkline (#74)**:
+  - Integrated lightweight, responsive SVG sparkline component (`UsageSparkline`) rendering historical consumption trends.
+  - Styled with semantic theme color-mix variables (`--dsw-alias-state-success`, `--dsw-alias-state-warning`, `--dsw-alias-state-danger`) conforming to zero-hex/zero-rgba design standards.
+
 ## 0.2.7
 
 ### Refactor & Quality
