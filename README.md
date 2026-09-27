@@ -124,7 +124,11 @@ graph LR
 - **Global Hotkey `Alt+K`**: Instant access to the Limits Hub from any view or workflow without reaching for the mouse.
 - **Danger Toast Warning**: Ambient alert appears when the active key dips below 15% quota, preventing surprise generation cutoffs.
 
-### 8. Built-in One-Click Updater
+### 8. Encrypted Backup & Batch Refresh
+- **Encrypted Export & Import**: Export all configured keys and subscriptions into a password-protected AES-256-GCM encrypted backup file for easy migration between devices or profiles.
+- **Refresh All**: One-click forced quota refresh in the Limits Hub with spinning progress animation and concurrency-limited batch querying.
+
+### 9. Built-in One-Click Updater
 - Check for updates directly within the settings card.
 - Installs the exact published package from npm without manual terminal intervention.
 - Protected against non-loopback or cross-origin requests.
