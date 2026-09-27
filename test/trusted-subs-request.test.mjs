@@ -272,6 +272,39 @@ test('HTTP routes: security hardening (#12, #60, #64, #65)', async () => {
     const importData = JSON.parse(importRes.body)
     assert.equal(importData.ok, true)
     assert.ok(importData.importedCount >= 1)
+
+    // 10. #90: GET /dsh-key-limits/config rejects cross-site requests
+    const configHandler = registeredRoutes.get('/dsh-key-limits/config')
+    assert.ok(configHandler, '/dsh-key-limits/config must be registered')
+    const crossConfigReq = createMockRequest({
+      method: 'GET',
+      url: '/dsh-key-limits/config',
+      headers: { host: '127.0.0.1:3080', 'sec-fetch-site': 'cross-site' }
+    })
+    const crossConfigRes = createMockResponse()
+    await configHandler(crossConfigReq, crossConfigRes)
+    assert.equal(crossConfigRes.statusCode, 403, 'cross-site request to /config must be rejected with 403')
+
+    const validConfigReq = createMockRequest({
+      method: 'GET',
+      url: '/dsh-key-limits/config',
+      headers: { host: '127.0.0.1:3080', 'sec-fetch-site': 'same-origin' }
+    })
+    const validConfigRes = createMockResponse()
+    await configHandler(validConfigReq, validConfigRes)
+    assert.equal(validConfigRes.statusCode, 200)
+
+    // 11. #88: POST /dsh-key-limits/subs rejects malformed JSON body
+    const badJsonReq = createMockRequest({
+      method: 'POST',
+      url: '/dsh-key-limits/subs',
+      headers: { host: '127.0.0.1:3080', 'sec-fetch-site': 'same-origin', origin: 'http://127.0.0.1:3080' },
+      rawChunks: [Buffer.from('{"broken": json')]
+    })
+    const badJsonRes = createMockResponse()
+    await subsHandler(badJsonReq, badJsonRes)
+    assert.equal(badJsonRes.statusCode, 400)
+    assert.ok(badJsonRes.body.includes('invalid json body'))
   } finally {
     for (const c of cleanups) {
       try { c() } catch {}

@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.2.11
+
+### Security, Lifecycle & Resiliency Fixes
+- **Export Secret Hydration (#85)**:
+  - Ensured credentials secrets are fully hydrated (`hydrateSecretsFromCredentials`) before serialized by `POST /dsh-key-limits/export`, preventing empty secrets in exported bundles right after server restart.
+- **Client Disposer & Slot Cleanup (#86)**:
+  - Wrapped composer bar slot (`conversation.composer.bar`) and settings card slots (`plugins.item`, `plugins.row.config`, `settings.plugin.item`) in `ctx.effect` returning disposer functions to prevent slot listener leaks during client HMR and page re-renders.
+- **Manifest Injection Parity (#87)**:
+  - Replaced direct `klCtx.sessions` read with safe `klCtx.get('sessions')` and aligned `package.json.dsh.client.inject` with runtime client bundle declaration (`slots`, `locale`, `configForms`).
+- **HTTP JSON Body Syntax Diagnostic (#88)**:
+  - Raised explicit `JsonParseError` (HTTP 400 Bad Request) on malformed JSON payload bodies across `/export`, `/import`, and `/subs` endpoints instead of silent failure or generic internal errors.
+- **Disk Write Race Condition Coordination (#89)**:
+  - Routed subscription card file writes (`saveSubCards`) through `CredentialStore.prototype.saveCards` and `CredentialStore._save()`, preventing clobbering and race conditions when cards and secret credentials persist to `subs.json` concurrently.
+- **Settings Config Route CSRF Protection (#90)**:
+  - Added `isTrustedSettingsRequest` origin and referer check to `GET /dsh-key-limits/config`, blocking unauthorized cross-origin requests from reading local provider configurations.
+
 ## 0.2.10
 
 ### Backup Security & Batch Refresh

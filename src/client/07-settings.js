@@ -488,25 +488,35 @@ function registerKeyLimitsSettings(ctx){
   //   kept as a fallback. It is NOT rendered by the current core.
   function trySlot(name, register){
     try{
-      if(typeof ctx.slots.inject==="function")ctx.slots.inject(name,register);
-      else register();
+      if(typeof ctx.slots.inject==="function") return ctx.slots.inject(name,register);
+      else return register();
     }catch(e){
       if(ctx.logger&&typeof ctx.logger.warn==="function")ctx.logger.warn("[dsh-key-limits] slot registration failed for "+name+": "+(e&&e.message));
+      return function(){};
     }
   }
-  trySlot("plugins.item",function(){
-    return ctx.slots.register({name:"plugins.item",id:ROW_ID,order:60,label:function(){return "Key Limits"},locale:NS,inject:function(){return{ctx}}},function(p){
-      return jsx(KeyLimitsPluginCard,{...p,locale:loc()});
+  ctx.effect(function(){
+    var unreg = [];
+    var off1 = trySlot("plugins.item",function(){
+      return ctx.slots.register({name:"plugins.item",id:ROW_ID,order:60,label:function(){return "Key Limits"},locale:NS,inject:function(){return{ctx}}},function(p){
+        return jsx(KeyLimitsPluginCard,{...p,locale:loc()});
+      });
     });
-  });
-  trySlot("plugins.row.config",function(){
-    return ctx.slots.register({name:"plugins.row.config",key:ROW_CONFIG_KEY,locale:NS,inject:function(){return{ctx}}},function(p){
-      return jsx(KeyLimitsPluginCard,{...p,locale:loc()});
+    if (typeof off1 === "function") unreg.push(off1);
+    var off2 = trySlot("plugins.row.config",function(){
+      return ctx.slots.register({name:"plugins.row.config",key:ROW_CONFIG_KEY,locale:NS,inject:function(){return{ctx}}},function(p){
+        return jsx(KeyLimitsPluginCard,{...p,locale:loc()});
+      });
     });
-  });
-  trySlot("settings.plugin.item",function(){
-    return ctx.slots.register({name:"settings.plugin.item",key:NS,locale:NS,inject:function(){return{ctx}}},function(p){
-      return jsx(KeyLimitsPluginCard,{...p,locale:loc()});
+    if (typeof off2 === "function") unreg.push(off2);
+    var off3 = trySlot("settings.plugin.item",function(){
+      return ctx.slots.register({name:"settings.plugin.item",key:NS,locale:NS,inject:function(){return{ctx}}},function(p){
+        return jsx(KeyLimitsPluginCard,{...p,locale:loc()});
+      });
     });
-  });
+    if (typeof off3 === "function") unreg.push(off3);
+    return function(){
+      unreg.forEach(function(fn){ try { fn(); } catch(_) {} });
+    };
+  }, "key-limits: settings slots");
 }
