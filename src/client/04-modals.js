@@ -118,7 +118,11 @@ function SubCard(props){
                 children: [
                   jsx("span", { className: "kl-provPill " + pCls, children: s.provider }),
                   s.plan ? jsx("span", { className: "kl-meta", style: { fontWeight: 600 }, children: s.plan }) : null,
-                  s.status === "ok" ? jsx("span", { className: "kl-dot", style: { background: "var(--dsw-alias-state-success)" } }) : null
+                  s.status === "ok" ? jsx("span", { className: "kl-dot", style: { background: "var(--dsw-alias-state-success)" } }) : null,
+                  (function(){
+                    var nr = findNearestReset([s]);
+                    return nr ? jsxs("span", { className: "kl-burn-tag", title: klT("resetsIn") + fmtReset(nr), children: [jsx(SvgClock, { size: 10 }), fmtReset(nr)] }) : null;
+                  })()
                 ]
               }),
               jsx("div", { className: "kl-subTitle", children: s.label || s.id })
@@ -248,6 +252,10 @@ function AllLimitsModal(props){
     }
   }
 
+  var pool = poolStats(subs);
+  var history = loadUsageHistory();
+  var burn = calcBurnRate(history);
+
   var filtered = subs.filter(function(s){
     if (state.tab === "quota") return s.quota && s.quota.windows && s.quota.windows.length;
     if (state.tab === "balance") return !!s.balance;
@@ -306,12 +314,13 @@ function AllLimitsModal(props){
                   jsxs("div", {
                     className: "kl-statCard",
                     children: [
-                      jsx("div", { className: "kl-statLabel", children: klT("totalAccounts") }),
+                      jsx("div", { className: "kl-statLabel", children: klT("poolHealth") }),
                       jsxs("div", {
                         className: "kl-statVal",
+                        style: { color: pool.exhausted > 0 ? "var(--dsw-alias-state-danger)" : (pool.warning > 0 ? "var(--dsw-alias-state-warning)" : "var(--dsw-alias-state-success)") },
                         children: [
-                          jsx("span", { className: "kl-dot", style: { background: "var(--dsw-alias-state-success)" } }),
-                          subs.length
+                          jsx("span", { className: "kl-dot", style: { background: pool.exhausted > 0 ? "var(--dsw-alias-state-danger)" : (pool.warning > 0 ? "var(--dsw-alias-state-warning)" : "var(--dsw-alias-state-success)") } }),
+                          pool.healthy + "/" + pool.total
                         ]
                       })
                     ]
@@ -330,8 +339,26 @@ function AllLimitsModal(props){
                   jsxs("div", {
                     className: "kl-statCard",
                     children: [
+                      jsx("div", { className: "kl-statLabel", children: klT("burnRate") }),
+                      jsxs("div", {
+                        className: "kl-statVal",
+                        children: [
+                          burn.idle ? klT("burnRateIdle") : (burn.rate + "%/h")
+                        ]
+                      })
+                    ]
+                  }),
+                  jsxs("div", {
+                    className: "kl-statCard",
+                    children: [
                       jsx("div", { className: "kl-statLabel", children: klT("balanceUsd") }),
                       jsx("div", { className: "kl-statVal", style: { color: "var(--dsw-alias-brand-primary)" }, children: "$" + totalBalUSD.toFixed(2) })
+                    ]
+                  }),
+                  jsxs("div", {
+                    className: "kl-statCard",
+                    children: [
+                      jsx(UsageSparkline, { history: history })
                     ]
                   })
                 ]

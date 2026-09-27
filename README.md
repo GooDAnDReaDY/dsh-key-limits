@@ -115,7 +115,13 @@ graph LR
 - Calm neutral tones for healthy (>30%) quota states, reserving amber and red strictly for warning (<30%) and critical (<15%) levels.
 - Sleek 5px progress bars that blend into the native DSH theme.
 
-### 6. Built-in One-Click Updater
+### 6. Pool Health & Predictive Analytics
+- **Pool Health Indicator**: Ambient breakdown of provider account pools (`healthy / warning / exhausted`), immediately surfacing accounts experiencing quota exhaustion or upstream timeouts.
+- **Burn Rate & Velocity**: Real-time hourly consumption speed tracking (`%/h`) and automatic time-to-depletion projection (`~X.X h left`) derived from 24-hour rolling browser usage snapshots.
+- **Ambient Reset Countdown**: Floating chip tooltip and account tags display humanized countdown timers to the nearest quota reset window (e.g., `Resets in 2h 15m`).
+- **24-Hour Usage Sparkline**: Compact SVG trendline visualizing quota drawdown dynamics, colored dynamically according to theme status states.
+
+### 7. Built-in One-Click Updater
 - Check for updates directly within the settings card.
 - Installs the exact published package from npm without manual terminal intervention.
 - Protected against non-loopback or cross-origin requests.

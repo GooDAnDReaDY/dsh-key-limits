@@ -44,6 +44,15 @@ var KL_en={
   tabBalances:"Balances",
   emptySettingsHint:"Add provider keys and tokens in plugin settings to track live quotas and balances.",
   activeBadge:" active",
+  poolHealth:"Pool health",
+  healthyCount:"healthy",
+  warningCount:"warning",
+  exhaustedCount:"exhausted",
+  burnRate:"Burn rate",
+  burnRateIdle:"idle",
+  hoursLeft:"left",
+  resetsIn:"Resets in ",
+  usageTrend:"24h usage trend",
 };
 
 var KL_zh={
@@ -91,6 +100,15 @@ var KL_zh={
   tabBalances:"余额",
   emptySettingsHint:"请在插件设置中添加提供商密钥，以实时监控配额与余额。",
   activeBadge:" 个活跃",
+  poolHealth:"连接池健康度",
+  healthyCount:"健康",
+  warningCount:"预警",
+  exhaustedCount:"耗尽",
+  burnRate:"消耗速率",
+  burnRateIdle:"空闲",
+  hoursLeft:"剩余可用",
+  resetsIn:"重置倒计时: ",
+  usageTrend:"24小时消耗趋势",
 };
 
 

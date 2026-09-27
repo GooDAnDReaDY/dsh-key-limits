@@ -12,7 +12,7 @@ function clampPos(x, y) {
 /* float chip — all keys */
 function FloatChip(){
   var st=useState({enabled:true,label:"…",worst:null,open:false});
-  var enabled=st[0].enabled,label=st[0].label,worst=st[0].worst,open=st[0].open,setSt=st[1];
+  var enabled=st[0].enabled,label=st[0].label,worst=st[0].worst,open=st[0].open,nearestReset=st[0].nearestReset,setSt=st[1];
   var initialPos = readPos();
   var pos=useState(initialPos ? clampPos(initialPos.x, initialPos.y) : null);
   var drag=useRef({active:false,dx:0,dy:0,moved:false});
@@ -29,8 +29,10 @@ function FloatChip(){
             var m=minRemaining(w);
             if(m!=null&&(wMin===null||m<wMin))wMin=m;
           }
+          if(wMin!=null) recordUsageSnapshot(wMin);
+          var nr = findNearestReset(subs);
           var text=n?(wMin!=null?fmtPct(wMin):String(n)):klT("activeNone");
-          setSt(function(s){return Object.assign({},s,{enabled:true,label:text,worst:wMin})});
+          setSt(function(s){return Object.assign({},s,{enabled:true,label:text,worst:wMin,nearestReset:nr})});
         }).catch(function(){/* best-effort: transient /subs poll failure ignored */});
       }).catch(function(){/* best-effort: transient /config poll failure ignored */});
     }
@@ -39,6 +41,11 @@ function FloatChip(){
   if(!enabled)return null;
   var p=pos[0]?clampPos(pos[0].x,pos[0].y):null,style={left:p&&p.x!=null?p.x+"px":"auto",top:p&&p.y!=null?p.y+"px":"auto",right:p&&p.x!=null?"auto":"16px",bottom:p&&p.y!=null?"auto":"16px"};
   var floatCls = "kl-float " + floatPctClass(worst);
+  var chipTitle = klT("floatTitle");
+  if(nearestReset){
+    var rStr = fmtReset(nearestReset);
+    if(rStr) chipTitle += " (" + klT("resetsIn") + rStr + ")";
+  }
   return jsxs(React.Fragment,{children:[
     jsx("div",{className:"kl-floatWrap",style:style,
       onPointerMove:function(e){
@@ -55,7 +62,7 @@ function FloatChip(){
         if(cp)savePos(cp.x,cp.y);
         try{e.currentTarget.releasePointerCapture(e.pointerId)}catch(err){/* best-effort: pointer capture might have already been released */}
       },
-      children:jsxs("div",{title:klT("floatTitle"),className:floatCls,
+      children:jsxs("div",{title:chipTitle,className:floatCls,
         onPointerDown:function(e){
           if(e.button!==0)return;
           drag.current.moved=false;
