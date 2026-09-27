@@ -226,6 +226,23 @@ function AllLimitsModal(props){
       });
   }
 
+  function refreshAll(){
+    setSt(function(s){ return Object.assign({}, s, { refreshing: true }); });
+    fetchWithTimeout(API + "/refresh-all", {
+      method: "POST",
+      headers: { "x-dsh-internal-auth": "1" }
+    })
+      .then(function(){ load(true); })
+      .catch(function(e){
+        setSt(function(s){
+          return Object.assign({}, s, {
+            refreshing: false,
+            err: String(e && e.message || e)
+          });
+        });
+      });
+  }
+
   function deleteOne(id, label){
     if (!confirm(klT("deleteConfirm") + label + "»?")) return;
     fetchWithTimeout(API + "/subs?id=" + encodeURIComponent(id), { method: "DELETE" })
@@ -302,7 +319,23 @@ function AllLimitsModal(props){
                   })
                 ]
               }),
-              jsx("button", { type: "button", className: "kl-close", onClick: onClose, children: jsx(SvgClose, {}) })
+              jsxs("div", {
+                style: { display: "flex", alignItems: "center", gap: 8 },
+                children: [
+                  jsx("button", {
+                    type: "button",
+                    className: "kl-btn kl-btn-ghost kl-btn-refresh-all",
+                    title: klT("refreshAll"),
+                    onClick: refreshAll,
+                    disabled: state.refreshing,
+                    children: [
+                      jsx(SvgRefresh, { size: 13, className: state.refreshing ? "kl-spin" : "" }),
+                      jsx("span", { style: { marginLeft: 5 }, children: state.refreshing ? klT("refreshing") : klT("refreshAll") })
+                    ]
+                  }),
+                  jsx("button", { type: "button", className: "kl-close", onClick: onClose, children: jsx(SvgClose, {}) })
+                ]
+              })
             ]
           }),
           jsxs("div", {

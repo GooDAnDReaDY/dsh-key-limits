@@ -59,6 +59,15 @@ var KL_en={
   hotkeyHint:"Alt+K to toggle",
   dangerToast:"Active quota critical",
   dangerRemaining:"remaining",
+  refreshAll:"Refresh All",
+  refreshing:"Refreshing…",
+  refreshed:"Refreshed",
+  exportBackup:"Export Backup",
+  importBackup:"Import Backup",
+  enterPassphrase:"Enter encryption passphrase",
+  exportSuccess:"Backup exported",
+  importSuccess:"Imported keys: ",
+  importError:"Import failed: ",
 };
 
 var KL_zh={
@@ -121,6 +130,13 @@ var KL_zh={
   hotkeyHint:"快捷键 Alt+K 快速打开",
   dangerToast:"当前活跃配额告急",
   dangerRemaining:"剩余",
+  refreshed:"已刷新",
+  exportBackup:"导出备份",
+  importBackup:"导入备份",
+  enterPassphrase:"输入加密密码",
+  exportSuccess:"备份文件已导出",
+  importSuccess:"已导入密钥数: ",
+  importError:"导入失败: ",
 };
 
 

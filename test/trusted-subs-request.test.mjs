@@ -224,6 +224,54 @@ test('HTTP routes: security hardening (#12, #60, #64, #65)', async () => {
       assert.equal(entry.secret, '', '#12: subs.json must NEVER store plaintext secret')
       assert.ok(entry.credentialRef, '#12: entry must have credentialRef')
     }
+
+    // 7. #81: POST /dsh-key-limits/refresh-all
+    const refreshAllHandler = registeredRoutes.get('/dsh-key-limits/refresh-all')
+    assert.ok(refreshAllHandler, '/dsh-key-limits/refresh-all must be registered')
+    const refreshAllReq = createMockRequest({
+      method: 'POST',
+      url: '/dsh-key-limits/refresh-all',
+      headers: { host: '127.0.0.1:3080', 'sec-fetch-site': 'same-origin', origin: 'http://127.0.0.1:3080' }
+    })
+    const refreshAllRes = createMockResponse()
+    await refreshAllHandler(refreshAllReq, refreshAllRes)
+    assert.equal(refreshAllRes.statusCode, 200)
+    const refreshAllData = JSON.parse(refreshAllRes.body)
+    assert.equal(refreshAllData.ok, true)
+    assert.ok(Array.isArray(refreshAllData.cards))
+
+    // 8. #80: POST /dsh-key-limits/export
+    const exportHandler = registeredRoutes.get('/dsh-key-limits/export')
+    assert.ok(exportHandler, '/dsh-key-limits/export must be registered')
+    const exportReq = createMockRequest({
+      method: 'POST',
+      url: '/dsh-key-limits/export',
+      headers: { host: '127.0.0.1:3080', 'sec-fetch-site': 'same-origin', origin: 'http://127.0.0.1:3080' },
+      body: { passphrase: 'backup-password-123' }
+    })
+    const exportRes = createMockResponse()
+    await exportHandler(exportReq, exportRes)
+    assert.equal(exportRes.statusCode, 200)
+    const exportData = JSON.parse(exportRes.body)
+    assert.equal(exportData.ok, true)
+    assert.ok(exportData.backup)
+    assert.equal(exportData.backup.version, 1)
+
+    // 9. #80: POST /dsh-key-limits/import
+    const importHandler = registeredRoutes.get('/dsh-key-limits/import')
+    assert.ok(importHandler, '/dsh-key-limits/import must be registered')
+    const importReq = createMockRequest({
+      method: 'POST',
+      url: '/dsh-key-limits/import',
+      headers: { host: '127.0.0.1:3080', 'sec-fetch-site': 'same-origin', origin: 'http://127.0.0.1:3080' },
+      body: { passphrase: 'backup-password-123', backup: exportData.backup }
+    })
+    const importRes = createMockResponse()
+    await importHandler(importReq, importRes)
+    assert.equal(importRes.statusCode, 200)
+    const importData = JSON.parse(importRes.body)
+    assert.equal(importData.ok, true)
+    assert.ok(importData.importedCount >= 1)
   } finally {
     for (const c of cleanups) {
       try { c() } catch {}
