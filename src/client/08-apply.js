@@ -5,9 +5,17 @@ function apply(ctx){
     return ensureKeyLimitsStyles();
   },"key-limits: style mount");
   registerKeyLimitsSettings(ctx);
-  ctx.slots.inject("conversation.composer.bar",function(){
-    return ctx.slots.register({name:"conversation.composer.bar",id:"key-limits-active",priority:10},ActiveKeyBound);
-  });
+  ctx.effect(function(){
+    var off = null;
+    try {
+      off = ctx.slots.inject("conversation.composer.bar",function(){
+        return ctx.slots.register({name:"conversation.composer.bar",id:"key-limits-active",priority:10},ActiveKeyBound);
+      });
+    } catch(e) {}
+    return function(){
+      if (typeof off === "function") try { off(); } catch(_) {}
+    };
+  }, "key-limits: composer bar slot");
   ctx.effect(function(){
     var el=document.createElement("div");el.id="dsh-key-limits-root";document.body.appendChild(el);
     var root=ReactDOM.createRoot(el);

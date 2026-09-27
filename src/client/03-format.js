@@ -1,6 +1,19 @@
 /* format */
 function sid(p){return p&&(p.sessionId||(p.session&&(p.session.sessionId||p.session.id)))||""}
-function sessionIdFromCtx(){try{var s=klCtx&&klCtx.sessions&&klCtx.sessions.list&&klCtx.sessions.list.getSnapshot();return s&&s.current||""}catch(e){return ""}}
+function sessionIdFromCtx(){
+  try{
+    var s = null;
+    if (klCtx && typeof klCtx.get === 'function') {
+      var sess = klCtx.get('sessions');
+      s = sess && sess.list && typeof sess.list.getSnapshot === 'function' ? sess.list.getSnapshot() : null;
+    } else if (klCtx && klCtx.sessions && klCtx.sessions.list) {
+      s = typeof klCtx.sessions.list.getSnapshot === 'function' ? klCtx.sessions.list.getSnapshot() : null;
+    }
+    return (s && s.current) || "";
+  }catch(e){
+    return "";
+  }
+}
 function fmtPct(n){var x=Number(n);return Number.isFinite(x)?Math.round(x)+"%":"—"}
 function fmtReset(resetsAt){
   if(!resetsAt)return"";

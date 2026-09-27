@@ -53,7 +53,7 @@ test('http-utils: json sets headers and stringifies body', () => {
   assert.deepEqual(JSON.parse(writtenData), { ok: true, count: 42 })
 })
 
-test('http-utils: readJsonBody parses JSON body and logs warning on syntax error', async () => {
+test('http-utils: readJsonBody parses JSON body and throws JsonParseError on syntax error (#88)', async () => {
   const validStream = Readable.from([Buffer.from('{"hello":'), Buffer.from('"world"}')])
   const valid = await readJsonBody(validStream)
   assert.deepEqual(valid, { hello: 'world' })
@@ -64,8 +64,16 @@ test('http-utils: readJsonBody parses JSON body and logs warning on syntax error
   const logs = []
   const mockLogger = { warn: (msg) => logs.push(msg) }
   const invalidStream = Readable.from([Buffer.from('invalid-json')])
-  const result = await readJsonBody(invalidStream, mockLogger)
-  assert.deepEqual(result, {})
+  await assert.rejects(
+    async () => {
+      await readJsonBody(invalidStream, mockLogger)
+    },
+    (err) => {
+      assert.equal(err.name, 'JsonParseError')
+      assert.equal(err.status, 400)
+      return true
+    }
+  )
   assert.equal(logs.length, 1)
   assert.ok(logs[0].includes('JSON.parse failed'))
 })
