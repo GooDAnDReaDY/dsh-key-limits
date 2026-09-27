@@ -269,10 +269,63 @@ var css = `
 .kl-prov-cline,
 .kl-prov-qwen,
 .kl-prov-ollama,
-.kl-prov-commandcode {
+.kl-prov-commandcode,
+.kl-prov-siliconflow,
+.kl-prov-anthropic,
+.kl-prov-groq,
+.kl-prov-gemini {
   background: color-mix(in srgb, var(--dsw-alias-brand-primary) 10%, var(--dsw-alias-bg-layer-3));
   border-color: var(--dsw-alias-border-l2);
   color: var(--dsw-alias-label-primary);
+}
+
+/* Docked mode & Danger Toast */
+.kl-float-docked {
+  right: 16px !important;
+  bottom: 16px !important;
+  left: auto !important;
+  top: auto !important;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--dsw-alias-bg-base) 45%, transparent);
+}
+.kl-dock-btn {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--dsw-alias-label-tertiary);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: color 0.15s ease;
+}
+.kl-dock-btn:hover {
+  color: var(--dsw-alias-label-primary);
+}
+.kl-danger-toast {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 10090;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--dsw-alias-bg-base) 88%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--dsw-alias-state-danger);
+  color: var(--dsw-alias-state-danger);
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 12px 32px color-mix(in srgb, var(--dsw-alias-state-danger) 25%, transparent);
+  animation: kl-zoom-in 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+.kl-danger-toast-text {
+  color: var(--dsw-alias-label-primary);
+  font-weight: 500;
 }
 
 .kl-subTitle {
