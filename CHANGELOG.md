@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.2.9
+
+### Providers & UI Controls
+- **SiliconFlow (SiliconCloud) Provider (#75)**:
+  - Added native SiliconFlow auto-fetcher querying balance and total credits via `https://api.siliconflow.cn/v1/user/info`.
+  - Added `parseSiliconFlowInfo` parsing CNY and USD balances.
+  - Registered `siliconflow` provider pill and branding.
+- **Anthropic, Groq, and Gemini Providers (#76)**:
+  - Added Groq auto-fetcher parsing RPM and TPM rate limit headers (`x-ratelimit-*`).
+  - Added Anthropic auto-fetcher parsing requests and tokens rate limits (`anthropic-ratelimit-*`).
+  - Added Google Gemini provider integration verifying API status and key health.
+  - Implemented modular `lib/provider-extra-fetchers.js` keeping all modules within the 600-line standard.
+- **Docked Mode for Floating Chip (#77)**:
+  - Added pin/dock button in floating chip header.
+  - Implemented `.kl-float-docked` fixed corner mode (non-draggable, neatly docked to lower corner) with localStorage persistence.
+- **Global Hotkey Alt+K (#78)**:
+  - Registered global keyboard shortcut `Alt+K` to toggle the All Limits Hub modal from anywhere in the DSH workspace.
+  - Prevented key intercept when active input/textarea has focus.
+- **Danger Toast Low-Quota Notification (#79)**:
+  - Added non-intrusive floating toast banner notifying user when active key falls below 15% quota.
+  - Dismissible with auto-snooze to avoid repetitive alert spam.
+
 ## 0.2.8
 
 ### Features & Predictive Analytics

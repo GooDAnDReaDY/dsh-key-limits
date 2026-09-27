@@ -121,7 +121,12 @@ graph LR
 - **无感重置倒计时**：悬浮胶囊工具提示与卡片标签即时显示最近窗口的重置剩余时间（如 `重置倒计时: 2h 15m`）。
 - **24小时消耗趋势折线（SVG Sparkline）**：轻量紧凑的无感矢量迷你走势图，根据配额状态自适应主题色彩。
 
-### 7. 内置一键版本更新
+### 7. 停靠吸附模式、全局快捷键与危险浮条告警
+- **停靠吸附（Docked Mode）**：胶囊标题栏提供一键吸附按钮，将胶囊固定在右下角，避免拖动遮挡且节省窗口空间。
+- **全局快捷键 `Alt+K`**：在任意界面随时呼出全额度管理中心，无需鼠标寻找胶囊。
+- **危险浮条（Danger Toast）**：当当前激活密钥配额降至 15% 以下时，屏幕顶部优雅弹出告警，防止生成突然中断。
+
+### 8. 内置一键版本更新
 - 在设置卡片内直接检测 npm 官方最新版本。
 - 自动化调用安装程序升级至确定版本，无需手动开启终端执行 shell 指令。
 - 严格限制为 Loopback 本地同源请求，保障系统安全。
@@ -140,6 +145,10 @@ graph LR
 | `glm` | 智谱清言 (GLM / Z.ai) | 每日 / 每月额度 | 个人中心 API 密钥 |
 | `minimax` | MiniMax Coding Plan | 编程计划专属配额 | API 密钥 (`sk-cp-...`) |
 | `cline` | Cline | 5小时 / 每周 / 每月 | Bearer API 令牌 |
+| `siliconflow` | 硅基流动 (SiliconFlow / SiliconCloud) | 账户总余额与赠金 ($ / ¥) | API 密钥 (`sk-...`) |
+| `anthropic` | Anthropic | 请求与 Token 速率配额 | API 密钥 (`sk-ant-...`) |
+| `groq` | Groq | RPM 与 TPM 实时限速 | API 密钥 (`gsk_...`) |
+| `gemini` | Google Gemini | API 状态与模型配额 | API 密钥 (`AIza...`) |
 | `deepseek` | DeepSeek | 账户资金余额 ($ / ¥) | API 密钥 (`sk-...`) |
 | `openrouter` | OpenRouter | 账户代币余额 ($ credits) | API 密钥 (`sk-or-...`) |
 
