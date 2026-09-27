@@ -119,9 +119,12 @@ graph LR
 - **Pool Health Indicator**: Ambient breakdown of provider account pools (`healthy / warning / exhausted`), immediately surfacing accounts experiencing quota exhaustion or upstream timeouts.
 - **Burn Rate & Velocity**: Real-time hourly consumption speed tracking (`%/h`) and automatic time-to-depletion projection (`~X.X h left`) derived from 24-hour rolling browser usage snapshots.
 - **Ambient Reset Countdown**: Floating chip tooltip and account tags display humanized countdown timers to the nearest quota reset window (e.g., `Resets in 2h 15m`).
-- **24-Hour Usage Sparkline**: Compact SVG trendline visualizing quota drawdown dynamics, colored dynamically according to theme status states.
+### 7. Docked Mode, Hotkey & Low-Quota Alerts
+- **Docked Mode**: One-click pin button in the floating chip docks it neatly into the bottom-right corner, locking movement and saving window space.
+- **Global Hotkey `Alt+K`**: Instant access to the Limits Hub from any view or workflow without reaching for the mouse.
+- **Danger Toast Warning**: Ambient alert appears when the active key dips below 15% quota, preventing surprise generation cutoffs.
 
-### 7. Built-in One-Click Updater
+### 8. Built-in One-Click Updater
 - Check for updates directly within the settings card.
 - Installs the exact published package from npm without manual terminal intervention.
 - Protected against non-loopback or cross-origin requests.
@@ -140,6 +143,10 @@ graph LR
 | `glm` | GLM (Z.ai) | Daily / Monthly Quota | API key |
 | `minimax` | MiniMax Coding Plan | Coding Plan Quota | API key (`sk-cp-...`) |
 | `cline` | Cline | 5h / Weekly / Monthly | Bearer API token |
+| `siliconflow` | SiliconFlow (SiliconCloud) | Total Balance / Credits ($ / ¥) | API key (`sk-...`) |
+| `anthropic` | Anthropic | Requests / Tokens Rate Limits | API key (`sk-ant-...`) |
+| `groq` | Groq | RPM & TPM Rate Limits | API key (`gsk_...`) |
+| `gemini` | Google Gemini | API Status / Model Quota | API key (`AIza...`) |
 | `deepseek` | DeepSeek | Balance ($ / ¥) | API key (`sk-...`) |
 | `openrouter` | OpenRouter | Balance ($ credits remaining) | API key (`sk-or-...`) |
 

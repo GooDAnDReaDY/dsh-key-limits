@@ -53,6 +53,12 @@ var KL_en={
   hoursLeft:"left",
   resetsIn:"Resets in ",
   usageTrend:"24h usage trend",
+  dockedMode:"Docked mode",
+  dock:"Dock to corner",
+  undock:"Undock to float",
+  hotkeyHint:"Alt+K to toggle",
+  dangerToast:"Active quota critical",
+  dangerRemaining:"remaining",
 };
 
 var KL_zh={
@@ -109,6 +115,12 @@ var KL_zh={
   hoursLeft:"剩余可用",
   resetsIn:"重置倒计时: ",
   usageTrend:"24小时消耗趋势",
+  dockedMode:"固定模式",
+  dock:"固定到右下角",
+  undock:"解除固定",
+  hotkeyHint:"快捷键 Alt+K 快速打开",
+  dangerToast:"当前活跃配额告急",
+  dangerRemaining:"剩余",
 };
 
 

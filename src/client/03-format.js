@@ -227,7 +227,18 @@ function providerClass(p){
   if(s.indexOf("qwen")!==-1)return "kl-prov-qwen";
   if(s.indexOf("ollama")!==-1)return "kl-prov-ollama";
   if(s.indexOf("commandcode")!==-1)return "kl-prov-commandcode";
+  if(s.indexOf("silicon")!==-1)return "kl-prov-siliconflow";
+  if(s.indexOf("anthropic")!==-1)return "kl-prov-anthropic";
+  if(s.indexOf("groq")!==-1)return "kl-prov-groq";
+  if(s.indexOf("gemini")!==-1)return "kl-prov-gemini";
   return "";
+}
+
+function SvgDock(props){
+  return jsx("svg",{width:props.size||12,height:props.size||12,viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:2.2,strokeLinecap:"round",strokeLinejoin:"round",className:props.className,style:props.style,children:[
+    jsx("rect",{x:3,y:3,width:18,height:18,rx:2}),
+    jsx("path",{d:"M15 3v18"})
+  ]});
 }
 
 function SvgKey(props){
