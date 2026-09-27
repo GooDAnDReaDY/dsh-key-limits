@@ -288,3 +288,17 @@ function SvgClock(props){
     jsx("polyline",{points:"12 6 12 12 16 14"})
   ]});
 }
+function SvgDownload(props){
+  return jsx("svg",{width:props.size||13,height:props.size||13,viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:2,strokeLinecap:"round",strokeLinejoin:"round",className:props.className,style:props.style,children:[
+    jsx("path",{d:"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"}),
+    jsx("polyline",{points:"7 10 12 15 17 10"}),
+    jsx("line",{x1:12,x2:12,y1:15,y2:3})
+  ]});
+}
+function SvgUpload(props){
+  return jsx("svg",{width:props.size||13,height:props.size||13,viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:2,strokeLinecap:"round",strokeLinejoin:"round",className:props.className,style:props.style,children:[
+    jsx("path",{d:"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"}),
+    jsx("polyline",{points:"17 8 12 3 7 8"}),
+    jsx("line",{x1:12,x2:12,y1:3,y2:15})
+  ]});
+}

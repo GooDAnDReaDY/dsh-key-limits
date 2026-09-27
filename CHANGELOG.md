@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.10
+
+### Backup Security & Batch Refresh
+- **Encrypted Subscription Export and Import (#80)**:
+  - Added military-grade AES-256-GCM encryption with Scrypt key derivation (`lib/crypto-backup.js`) for exporting and importing subscription configurations with secrets.
+  - Implemented secure backend endpoints `POST /dsh-key-limits/export` and `POST /dsh-key-limits/import` protected by fail-closed `isTrustedSettingsRequest`.
+  - Added Export/Import UI buttons with passphrase prompts in the Settings card.
+- **Forced Batch Update Refresh All (#81)**:
+  - Added "Refresh All" button with spinning icon animation in `AllLimitsModal` header.
+  - Implemented `POST /dsh-key-limits/refresh-all` backend route clearing cached quotas and orchestrating parallel refreshes with concurrency pool.
+
 ## 0.2.9
 
 ### Providers & UI Controls

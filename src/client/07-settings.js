@@ -293,6 +293,116 @@ function UpdaterSection(props){
   ]});
 }
 
+function BackupSection(props){
+  var t = props.t || klT;
+  var st = useState({ status: "", error: "", busy: false });
+  var s = st[0], setSt = st[1];
+  var fileInputRef = useRef(null);
+
+  function handleExport(){
+    var pwd = prompt(t("enterPassphrase") + " (min 4 chars):");
+    if (!pwd) return;
+    if (pwd.length < 4) {
+      alert(t("enterPassphrase"));
+      return;
+    }
+    setSt(function(x){ return Object.assign({}, x, { busy: true, error: "", status: "" }); });
+    fetchWithTimeout(API + "/export", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-dsh-internal-auth": "1" },
+      body: JSON.stringify({ passphrase: pwd })
+    })
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if (data.error) throw new Error(data.error);
+        var blob = new Blob([JSON.stringify(data.backup, null, 2)], { type: "application/json" });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = "dsh-key-limits-backup-" + new Date().toISOString().slice(0, 10) + ".json";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        setSt(function(x){ return Object.assign({}, x, { busy: false, status: t("exportSuccess") }); });
+      })
+      .catch(function(err){
+        setSt(function(x){ return Object.assign({}, x, { busy: false, error: err.message || String(err) }); });
+      });
+  }
+
+  function handleImportFile(e){
+    var file = e.target.files && e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(evt){
+      try {
+        var parsed = JSON.parse(evt.target.result);
+        var pwd = prompt(t("enterPassphrase") + ":");
+        if (!pwd) return;
+        setSt(function(x){ return Object.assign({}, x, { busy: true, error: "", status: "" }); });
+        fetchWithTimeout(API + "/import", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-dsh-internal-auth": "1" },
+          body: JSON.stringify({ passphrase: pwd, backup: parsed })
+        })
+          .then(function(r){ return r.json(); })
+          .then(function(data){
+            if (data.error) throw new Error(data.error);
+            setSt(function(x){ return Object.assign({}, x, { busy: false, status: t("importSuccess") + data.importedCount }); });
+          })
+          .catch(function(err){
+            setSt(function(x){ return Object.assign({}, x, { busy: false, error: t("importError") + (err.message || String(err)) }); });
+          });
+      } catch (parseErr) {
+        setSt(function(x){ return Object.assign({}, x, { error: t("importError") + (parseErr.message || String(parseErr)) }); });
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  }
+
+  return jsxs("div", {
+    style: { marginTop: 14, paddingTop: 12, borderTop: "1px solid var(--dsw-alias-border-l2)" },
+    children: [
+      jsxs("div", {
+        style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 },
+        children: [
+          jsx("div", { className: "kl-meta", children: t("exportBackup") + " / " + t("importBackup") }),
+          jsxs("div", {
+            style: { display: "flex", gap: 8 },
+            children: [
+              jsx("button", {
+                type: "button",
+                className: "kl-btn",
+                disabled: s.busy,
+                onClick: handleExport,
+                children: jsxs("span", { style: { display: "inline-flex", alignItems: "center", gap: 4 }, children: [jsx(SvgDownload, { size: 12 }), t("exportBackup")] })
+              }),
+              jsx("button", {
+                type: "button",
+                className: "kl-btn",
+                disabled: s.busy,
+                onClick: function(){ if (fileInputRef.current) fileInputRef.current.click(); },
+                children: jsxs("span", { style: { display: "inline-flex", alignItems: "center", gap: 4 }, children: [jsx(SvgUpload, { size: 12 }), t("importBackup")] })
+              }),
+              jsx("input", {
+                type: "file",
+                accept: ".json,application/json",
+                ref: fileInputRef,
+                style: { display: "none" },
+                onChange: handleImportFile
+              })
+            ]
+          })
+        ]
+      }),
+      s.status ? jsx("div", { className: "kl-meta", style: { color: "var(--dsw-alias-state-success)", marginTop: 6 }, children: s.status }) : null,
+      s.error ? jsx("div", { className: "kl-meta", style: { color: "var(--dsw-alias-state-danger)", marginTop: 6 }, children: s.error }) : null
+    ]
+  });
+}
+
 var ChevronIcon = null;
 try {
   var primitives = require("@deepseek-ai/dsh-client-ui-primitives");
@@ -313,6 +423,7 @@ function KeyLimitsSettingsForm(props){
   return jsxs("div",{className:"kl-page",children:[
     jsx(ConfigFields,{ctx:ctx,t:t}),
     jsx(KeysSettingsBody,{}),
+    jsx(BackupSection,{ctx:ctx,t:t}),
     jsx(UpdaterSection,{ctx:ctx,t:t})
   ]});
 }
@@ -345,6 +456,7 @@ function KeyLimitsPluginCard(props){
     open?jsxs("div",{className:"kl-body",children:[
       jsx(ConfigFields,{ctx:ctx,t:t}),
       jsx(KeysSettingsBody,{}),
+      jsx(BackupSection,{ctx:ctx,t:t}),
       jsx(UpdaterSection,{ctx:ctx,t:t})
     ]}):null
   ]});
