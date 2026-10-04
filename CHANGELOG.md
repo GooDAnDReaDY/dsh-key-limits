@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.2.12
+
+### Security & Storage Integrity Hardening
+- **Secret Extra Masking & Permissions (#96)**:
+  - Masked Ollama session cookie (and any provider secret extra fields) on disk in `subs.json` (`secret: ''`, `extra: ''`).
+  - Stored session cookie in DSH `credentials` service via `extraCredentialRef` (`DSH_KEY_LIMITS_<ID>_EXTRA`).
+  - Enforced `0600` POSIX file permissions (`mode: 0o600` and `chmodSync`) on `subs.json` and temporary swap files to prevent multi-user local leakage.
+- **Revoked Credential Memory Purging (#97)**:
+  - Reset in-memory secret cache (`c.secret = ''` and secret `c.extra = ''`) before credential resolution in `hydrateSecretsFromCredentials`.
+  - Prevented deleted/revoked credentials from lingering in memory, auto-refresh, or leaking into encrypted backup exports via `POST /dsh-key-limits/export`.
+- **Redirect Auth Header Leak Prevention (#98)**:
+  - Defaulted `fetchWithTimeout` redirect mode to `error`, blocking automatic HTTP 301/302/307 redirects to external origins and preventing cross-origin credential header leakage.
+- **Disk Persistence Error Propagation & Rollback (#104)**:
+  - Prevented silent persistence failures in `CredentialStore._save()` by cleaning up temporary files and propagating I/O errors.
+  - Implemented transactional rollback for in-memory credential maps (`creds` and `meta`) when disk writes fail.
+  - Returned HTTP 500 on disk failures in `POST /subs` and `DELETE /subs` instead of false success.
+- **Ghost Subscription Resurrection Protection (#105)**:
+  - Added monotonic credential revision tracking (`rev`) on subscription entities.
+  - Discarded stale card revisions and filtered out deleted credentials in `saveCards()` to prevent in-flight refreshes from resurrecting removed accounts.
+
 ## 0.2.11
 
 ### Security, Lifecycle & Resiliency Fixes
