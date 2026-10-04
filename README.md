@@ -133,6 +133,13 @@ graph LR
 - Installs the exact published package from npm without manual terminal intervention.
 - Protected against non-loopback or cross-origin requests.
 
+### 10. Security & Storage Architecture
+- **Isolated Secret Persistence**: Plaintext API keys and sensitive session cookies (e.g. Ollama Cloud) are stored exclusively in the host DSH `credentials` service. The local `subs.json` file only contains non-sensitive metadata and references.
+- **Strict File Permissions**: The `subs.json` database and temporary swap files are enforced with strict POSIX `0600` file modes, preventing multi-user local inspection.
+- **Fail-Closed Memory Hygiene**: The in-memory cache purges sensitive secrets before resolving, ensuring revoked or deleted credentials do not persist in background polling or leak into backup exports.
+- **Redirect Protection**: Provider API fetchers enforce `redirect: 'error'`, preventing sensitive authorization headers (`x-api-key`, Bearer tokens) from leaking cross-origin across HTTP 301/302/307 redirects.
+- **Transactional Persistence**: Disk write failures automatically roll back in-memory state and return standard HTTP 500 responses rather than reporting false success.
+
 ---
 
 ## 🔌 Supported Providers
