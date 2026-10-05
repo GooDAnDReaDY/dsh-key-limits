@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.2.22
+
+### Block 3: UI/UX, Accessibility, Focus Management & Localization (#109, #110, #111, #115, #117)
+- **Reactive Locale Subscriptions & Provider Field Translations (#109)**:
+  - Subscribed ActiveKeyButton, FloatChip, OneLimitModal, AllLimitsModal, SubCard, and QuotaBars to useActiveLocale so all surfaces update dynamically on language switches without reload.
+  - Added labelKey generation to providerSchemas in lib/subs.js and translated all secret/extra field labels and hints across English and Chinese dictionaries.
+  - Enhanced AddKeyModal to resolve localized field labels and validation error messages seamlessly.
+- **Authoritative Polling Cutoff & Timeout Feedback (#110)**:
+  - Extended KeysInlineList polling cutoff to 30 attempts with an authoritative final fetch on cutoff to capture in-flight updates.
+  - Terminated refreshing state and presented localized refreshTimeout error notice when queries exceed cutoff threshold.
+- **Safe HTTP 403 / Error Handling in Settings Forms (#111)**:
+  - Replaced unverified fetchWithTimeout on /subs in ConfigFields with fetchJson.
+  - Preserved subsListRef.current and account ordering on 403 Forbidden or network errors, preventing silent wipeout, and displayed error message in msg.
+- **Fixed Interval Buckets for Rolling Usage Snapshots (#115)**:
+  - Replaced sliding interval checks in recordUsageSnapshot with fixed bucket alignment Math.floor(now / HIST_BUCKET_MS) * HIST_BUCKET_MS, preventing frequent samples from endlessly overwriting the same timestamp.
+- **Accessible Modal Semantics, Focus Trap & Restoration (#117)**:
+  - Added initial focus targeting, Tab/Shift+Tab focus trapping, Escape key dismissal, and prior focus restoration upon unmounting in PortalModal.
+  - Enforced role="dialog", aria-modal="true", and descriptive aria-label accessibility attributes on all modal surfaces.
+
 ## 0.2.21
 
 ### Block 2: Configuration, Providers & Dynamic Scheduling (#92, #106, #112, #99)
