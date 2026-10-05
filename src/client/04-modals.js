@@ -73,7 +73,7 @@ function OneLimitModal(props){
             children: [
               jsxs("div", {
                 children: [
-                  jsx("div", { className: "kl-eyebrow", children: [jsx(SvgKey, { size: 11 }), "ACTIVE SESSION LIMIT"] }),
+                  jsx("div", { className: "kl-eyebrow", children: [jsx(SvgKey, { size: 11 }), klT("activeSessionEyebrow")] }),
                   jsx("div", { className: "kl-panelTitle", children: title }),
                   subline ? jsx("div", { className: "kl-panelSub", children: subline }) : null
                 ]
@@ -309,7 +309,7 @@ function AllLimitsModal(props){
             children: [
               jsxs("div", {
                 children: [
-                  jsx("div", { className: "kl-eyebrow", children: [jsx(SvgKey, { size: 11 }), "KEY LIMITS & SUBSCRIPTION HUB"] }),
+                  jsx("div", { className: "kl-eyebrow", children: [jsx(SvgKey, { size: 11 }), klT("hubEyebrow")] }),
                   jsxs("div", {
                     className: "kl-panelTitle",
                     children: [

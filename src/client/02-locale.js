@@ -1,5 +1,35 @@
 /* locale */
 var KL_en={
+  activeSessionEyebrow: "ACTIVE SESSION LIMIT",
+  hubEyebrow: "KEY LIMITS & SUBSCRIPTION HUB",
+  prov_label_opencode_go: "OpenCode GO",
+  prov_label_ollama: "Ollama Cloud",
+  prov_label_qwen: "Qwen Cloud",
+  prov_label_kimi: "Kimi for Coding",
+  prov_label_glm: "GLM (Z.ai)",
+  prov_label_minimax: "MiniMax",
+  prov_label_cline: "Cline",
+  prov_label_deepseek: "DeepSeek",
+  prov_label_commandcode: "Command Code",
+  prov_label_openrouter: "OpenRouter",
+  prov_label_siliconflow: "SiliconFlow",
+  prov_label_anthropic: "Anthropic",
+  prov_label_groq: "Groq",
+  prov_label_gemini: "Google Gemini",
+  prov_hint_opencode_go: "DevTools -> Application -> Cookies on opencode.ai: auth cookie value. Workspace is the ID or full URL to /go.",
+  prov_hint_ollama: "Ollama Cloud API key + session cookie from ollama.com. Key is used for POST /api/me, cookie for usage on /settings.",
+  prov_hint_qwen: "Cookie from curl -b or Request Headers -> cookie on home.qwencloud.com/analytics/token-plan/individual",
+  prov_hint_kimi: "Kimi for Coding API key (sk-kimi-...). JWT/cookie is not currently supported.",
+  prov_hint_glm: "API key from personal account on z.ai (sent in Authorization header without Bearer).",
+  prov_hint_minimax: "MiniMax Coding Plan API key (sk-cp-...).",
+  prov_hint_cline: "Bearer API key from cline.bot. Quotas: 5h / week / month (usage-limits).",
+  prov_hint_deepseek: "API key -- remaining balance in $ (GET api.deepseek.com/user/balance; CNY is converted to USD).",
+  prov_hint_commandcode: "Command Code API key (user_... or COMMANDCODE_API_KEY). Quotas: 5h / weekly window.",
+  prov_hint_openrouter: "OpenRouter API key -- shows $ balance (credits - usage).",
+  prov_hint_siliconflow: "SiliconFlow (SiliconCloud) API key (sk-...). Shows balance in ¥ and $.",
+  prov_hint_anthropic: "Anthropic Console API key (sk-ant-...). Validates key and monitors rate limits.",
+  prov_hint_groq: "Groq API key (gsk_...). Shows live rate limit windows and tokens remaining.",
+  prov_hint_gemini: "Google Gemini API key from Google AI Studio (AIzaSy...).",
   storageDir:"Storage directory",
   totalAccounts:"Total accounts",
   activeOnTop:"Active account always on top",
@@ -71,6 +101,36 @@ var KL_en={
 };
 
 var KL_zh={
+  activeSessionEyebrow: "当前会话额度",
+  hubEyebrow: "密钥与订阅控制台",
+  prov_label_opencode_go: "OpenCode GO",
+  prov_label_ollama: "Ollama Cloud",
+  prov_label_qwen: "通义千问云 (Qwen)",
+  prov_label_kimi: "Kimi for Coding",
+  prov_label_glm: "智谱清言 (GLM / Z.ai)",
+  prov_label_minimax: "MiniMax",
+  prov_label_cline: "Cline",
+  prov_label_deepseek: "DeepSeek (深度求索)",
+  prov_label_commandcode: "Command Code",
+  prov_label_openrouter: "OpenRouter",
+  prov_label_siliconflow: "硅基流动 (SiliconFlow)",
+  prov_label_anthropic: "Anthropic (Claude)",
+  prov_label_groq: "Groq",
+  prov_label_gemini: "Google Gemini",
+  prov_hint_opencode_go: "在 opencode.ai 打开开发者工具 -> Application -> Cookies: 复制 auth cookie 的值。工作区填写 ID 或 /go 完整地址。",
+  prov_hint_ollama: "Ollama Cloud API 密钥 + 来自 ollama.com 的会话 Cookie。密钥用于查询身份，Cookie 用于额度展示。",
+  prov_hint_qwen: "来自 home.qwencloud.com/analytics/token-plan/individual 的请求头 Cookie 字符串。",
+  prov_hint_kimi: "Kimi for Coding API 密钥 (sk-kimi-...)。暂不支持纯 JWT/Cookie 鉴权。",
+  prov_hint_glm: "来自 z.ai 个人控制台的 API 密钥。",
+  prov_hint_minimax: "MiniMax Coding Plan API 密钥 (sk-cp-...)。",
+  prov_hint_cline: "来自 cline.bot 的 Bearer API 密钥。监控 5小时 / 周 / 月 额度。",
+  prov_hint_deepseek: "DeepSeek API 密钥 -- 监控账户剩余美元余额与人民币余额。",
+  prov_hint_commandcode: "Command Code API 密钥 (user_... 或 COMMANDCODE_API_KEY)。监控 5小时与周度额度。",
+  prov_hint_openrouter: "OpenRouter API 密钥 -- 显示美元可用余额。",
+  prov_hint_siliconflow: "SiliconFlow (硅基流动) API 密钥 (sk-...)。显示人民币与美元余额。",
+  prov_hint_anthropic: "Anthropic Console API 密钥 (sk-ant-...)。验证密钥并监控速率限制窗口。",
+  prov_hint_groq: "Groq API 密钥 (gsk_...)。监控实时速率限制与剩余 Token 窗口。",
+  prov_hint_gemini: "Google AI Studio 申请的 Gemini API 密钥 (AIzaSy...)。",
   storageDir:"数据目录",
   totalAccounts:"总账户数",
   activeOnTop:"活跃账户置顶",
@@ -142,16 +202,77 @@ var KL_zh={
 
 function klLang(){
   try{
-    var l=(klCtx&&klCtx.locale&&klCtx.locale.locale)||"en";
-    var s=String(l).toLowerCase();
-    if(s.indexOf("zh")===0)return "zh";
+    if (klCtx && klCtx.locale) {
+      if (typeof klCtx.locale.getSnapshot === "function") {
+        var snap = klCtx.locale.getSnapshot();
+        if (snap && snap.active) {
+          var sa = String(snap.active).toLowerCase();
+          return sa.indexOf("zh") === 0 ? "zh" : (sa.indexOf("ru") === 0 ? "ru" : "en");
+        }
+      }
+      if (klCtx.locale.locale) {
+        var l = String(klCtx.locale.locale).toLowerCase();
+        return l.indexOf("zh") === 0 ? "zh" : (l.indexOf("ru") === 0 ? "ru" : "en");
+      }
+    }
     return "en";
   }catch(e){return "en"}
 }
+
 function klT(key){
-  var lang=klLang();
-  var dict=lang==="zh"?KL_zh:KL_en;
-  return dict[key]!=null?dict[key]:(KL_en[key]!=null?KL_en[key]:key);
+  if (klCtx && klCtx.locale && typeof klCtx.locale.bind === "function") {
+    try {
+      var boundT = klCtx.locale.bind("dsh-key-limits");
+      if (typeof boundT === "function") {
+        var res = boundT(key);
+        if (res && res !== key) return res;
+      }
+    } catch (_) {}
+  }
+  var lang = klLang();
+  var dict = lang === "zh" ? KL_zh : KL_en;
+  return dict[key] != null ? dict[key] : (KL_en[key] != null ? KL_en[key] : key);
 }
-function makeT(dict,fb){return function(k){return dict[k]!=null?dict[k]:(fb[k]!=null?fb[k]:k)}}
-function useActiveLocale(ctx){var st=useState(function(){try{return (ctx.locale&&ctx.locale.locale)||"en"}catch(e){return"en"}});useEffect(function(){if(!ctx||!ctx.locale||!ctx.locale.watch)return;return ctx.locale.watch(function(l){st[1](l)})},[ctx]);return String(st[0]||"").toLowerCase().indexOf("zh")===0?"zh":"en"}
+
+function makeT(dict, fb){
+  return function(k){
+    if (klCtx && klCtx.locale && typeof klCtx.locale.bind === "function") {
+      try {
+        var boundT = klCtx.locale.bind("dsh-key-limits");
+        if (typeof boundT === "function") {
+          var res = boundT(k);
+          if (res && res !== k) return res;
+        }
+      } catch (_) {}
+    }
+    return dict[k] != null ? dict[k] : (fb[k] != null ? fb[k] : k);
+  };
+}
+
+function useActiveLocale(ctx){
+  var st = useState(function(){
+    try {
+      if (ctx && ctx.locale && typeof ctx.locale.getSnapshot === "function") {
+        var snap = ctx.locale.getSnapshot();
+        if (snap && snap.active) return snap.active;
+      }
+      return (ctx && ctx.locale && ctx.locale.locale) || "en";
+    } catch(e) { return "en"; }
+  });
+  useEffect(function(){
+    if (!ctx || !ctx.locale) return;
+    if (typeof ctx.locale.subscribe === "function") {
+      return ctx.locale.subscribe(function(){
+        try {
+          var snap = ctx.locale.getSnapshot();
+          if (snap && snap.active) st[1](snap.active);
+        } catch (_) {}
+      });
+    }
+    if (typeof ctx.locale.watch === "function") {
+      return ctx.locale.watch(function(l){ st[1](l); });
+    }
+  }, [ctx]);
+  var active = String(st[0] || "").toLowerCase();
+  return active.indexOf("zh") === 0 ? "zh" : (active.indexOf("ru") === 0 ? "ru" : "en");
+}

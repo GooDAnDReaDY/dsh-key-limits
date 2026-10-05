@@ -1,6 +1,7 @@
 /* settings card */
 function AddKeyModal(props){
   var onClose=props.onClose,onSaved=props.onSaved;
+  var t=(props&&props.t)||klT;
   var st=useState({loading:true,schemas:{},provider:"",label:"",secret:"",extra:"",err:"",saving:false});
   var s=st[0],setSt=st[1];
   useEffect(function(){
@@ -15,67 +16,74 @@ function AddKeyModal(props){
 
   function save(){
     if(!s.provider||!s.secret){
-      setSt(function(x){return Object.assign({},x,{err:klT("fillFields")+(!s.provider?klT("pickProvider"):klT("secret"))})});
+      setSt(function(x){return Object.assign({},x,{err:t("fillFields")+(!s.provider?t("pickProvider"):t("secret"))})});
       return;
     }
     setSt(function(x){return Object.assign({},x,{saving:true,err:""})});
     fetchWithTimeout(API+"/subs",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({provider:s.provider,secret:s.secret,extra:s.extra,label:s.label})}).then(function(r){return r.json()}).then(function(j){
       if(j.error){setSt(function(x){return Object.assign({},x,{saving:false,err:j.error})});return}
       onSaved&&onSaved();onClose&&onClose();
-    }).catch(function(e){setSt(function(x){return Object.assign({},x,{saving:false,err:String(e&&e.message||e)||klT("saveError")})})});
+    }).catch(function(e){setSt(function(x){return Object.assign({},x,{saving:false,err:String(e&&e.message||e)||t("saveError")})})});
   }
+  var providerHint = schema ? (t("prov_hint_" + s.provider.replace(/-/g, "_")) || schema.hint) : null;
   return jsx(PortalModal,{onClose:onClose,children:jsx("div",{className:"kl-overlay",onClick:onClose,children:
     jsxs("div",{className:"kl-panel",onClick:function(e){e.stopPropagation()},children:[
       jsxs("div",{className:"kl-panelHead",children:[
         jsxs("div",{children:[
           jsxs("div",{className:"kl-panelTitle",children:[
             jsx(SvgPlus,{size:15}),
-            klT("addKey")
+            t("addKey")
           ]}),
-          jsx("div",{className:"kl-panelSub",children:klT("pickProvider")})
+          jsx("div",{className:"kl-panelSub",children:t("pickProvider")})
         ]}),
         jsx("button",{type:"button",className:"kl-close",onClick:onClose,children:jsx(SvgClose,{})})
       ]}),
-      jsx("div",{className:"kl-panelBody",children:s.loading?jsx("div",{className:"kl-meta",children:klT("loading")}):jsxs(React.Fragment,{children:[
+      jsx("div",{className:"kl-panelBody",children:s.loading?jsx("div",{className:"kl-meta",children:t("loading")}):jsxs(React.Fragment,{children:[
         jsxs("div",{className:"kl-field",children:[
-          jsx("div",{className:"kl-fieldLabel",children:klT("pickProvider")}),
+          jsx("div",{className:"kl-fieldLabel",children:t("pickProvider")}),
           jsxs("select",{className:"kl-input",value:s.provider,onChange:function(e){setSt(function(x){return Object.assign({},x,{provider:e.target.value})})},children:[
-            jsx("option",{value:"",children:klT("pickDash")}),
-            providers.map(function(p){return jsx("option",{key:p,value:p,children:(s.schemas[p]&&s.schemas[p].label)||p})})
+            jsx("option",{value:"",children:t("pickDash")}),
+            providers.map(function(p){
+              var pKey = "prov_label_" + p.replace(/-/g, "_");
+              var pLabel = t(pKey) || (s.schemas[p] && s.schemas[p].label) || p;
+              return jsx("option",{key:p,value:p,children:pLabel});
+            })
           ]})
         ]}),
-        schema&&schema.hint?jsx("div",{className:"kl-meta",children:schema.hint}):null,
-        jsxs("div",{className:"kl-field",children:[jsx("div",{className:"kl-fieldLabel",children:klT("labelOptional")}),jsx("input",{className:"kl-input",value:s.label,onChange:function(e){setSt(function(x){return Object.assign({},x,{label:e.target.value})})}})]}),
-        jsxs("div",{className:"kl-field",children:[jsx("div",{className:"kl-fieldLabel",children:klT("secret")}),jsx("input",{className:"kl-input",type:"password",value:s.secret,onChange:function(e){setSt(function(x){return Object.assign({},x,{secret:e.target.value})})}})]}),
-        schema&&schema.extra?jsxs("div",{className:"kl-field",children:[jsx("div",{className:"kl-fieldLabel",children:klT("extra")}),jsx("input",{className:"kl-input",value:s.extra,onChange:function(e){setSt(function(x){return Object.assign({},x,{extra:e.target.value})})}})]}):null,
+        providerHint?jsx("div",{className:"kl-meta",children:providerHint}):null,
+        jsxs("div",{className:"kl-field",children:[jsx("div",{className:"kl-fieldLabel",children:t("labelOptional")}),jsx("input",{className:"kl-input",value:s.label,onChange:function(e){setSt(function(x){return Object.assign({},x,{label:e.target.value})})}})]}),
+        jsxs("div",{className:"kl-field",children:[jsx("div",{className:"kl-fieldLabel",children:t("secret")}),jsx("input",{className:"kl-input",type:"password",value:s.secret,onChange:function(e){setSt(function(x){return Object.assign({},x,{secret:e.target.value})})}})]}),
+        schema&&schema.extra?jsxs("div",{className:"kl-field",children:[jsx("div",{className:"kl-fieldLabel",children:t("extra")}),jsx("input",{className:"kl-input",value:s.extra,onChange:function(e){setSt(function(x){return Object.assign({},x,{extra:e.target.value})})}})]}):null,
         s.err?jsxs("div",{className:"kl-alertError",children:[jsx(SvgAlert,{}),jsx("span",{children:s.err})]}):null
       ]})}),
       jsxs("div",{className:"kl-panelFoot",children:[
-        jsx("button",{type:"button",className:"kl-btn",onClick:onClose,children:klT("cancel")}),
-        jsx("button",{type:"button",className:"kl-btn kl-btnPrimary",disabled:s.saving,onClick:save,children:s.saving?klT("loading"):klT("save")})
+        jsx("button",{type:"button",className:"kl-btn",onClick:onClose,children:t("cancel")}),
+        jsx("button",{type:"button",className:"kl-btn kl-btnPrimary",disabled:s.saving,onClick:save,children:s.saving?t("loading"):t("save")})
       ]})
     ]})
   })});
 }
 
-function KeysSettingsBody(){
+function KeysSettingsBody(props){
+  var t=(props&&props.t)||klT;
   var st=useState({addOpen:false,tick:0});
   var addOpen=st[0].addOpen,setSt=st[1];
   return jsxs("div",{children:[
     jsxs("div",{className:"kl-toolbar",style:{marginBottom:12},children:[
       jsxs("button",{type:"button",className:"kl-btn kl-btnPrimary",onClick:function(){setSt(function(s){return Object.assign({},s,{addOpen:true})})},children:[
         jsx(SvgPlus,{size:13}),
-        klT("add")
+        t("add")
       ]})
     ]}),
-    jsx(KeysInlineList,{key:st[0].tick}),
-    addOpen?jsx(AddKeyModal,{onClose:function(){setSt(function(s){return Object.assign({},s,{addOpen:false})})},onSaved:function(){setSt(function(s){return Object.assign({},s,{addOpen:false,tick:s.tick+1})})}}):null,
-    jsx("div",{className:"kl-meta",style:{marginTop:14},children:klT("uiHint")}),
-    jsx("div",{className:"kl-meta",children:klT("dataPath")})
+    jsx(KeysInlineList,{key:st[0].tick,t:t}),
+    addOpen?jsx(AddKeyModal,{t:t,onClose:function(){setSt(function(s){return Object.assign({},s,{addOpen:false})})},onSaved:function(){setSt(function(s){return Object.assign({},s,{addOpen:false,tick:s.tick+1})})}}):null,
+    jsx("div",{className:"kl-meta",style:{marginTop:14},children:t("uiHint")}),
+    jsx("div",{className:"kl-meta",children:t("dataPath")})
   ]});
 }
 
-function KeysInlineList(){
+function KeysInlineList(props){
+  var t=(props&&props.t)||klT;
   var st=useState({loading:true,subscriptions:[],refreshing:false,err:""});
   var state=st[0],setSt=st[1];
   function load(refresh){
@@ -85,20 +93,20 @@ function KeysInlineList(){
   }
   useEffect(function(){load(false)},[]);
   function del(id,label){
-    if(!confirm(klT("deleteConfirm")+label+"»?"))return;
+    if(!confirm(t("deleteConfirm")+label+"»?"))return;
     fetchWithTimeout(API+"/subs?id="+encodeURIComponent(id),{method:"DELETE"}).then(function(){load(false)});
   }
   return jsxs("div",{children:[
     jsxs("div",{className:"kl-toolbar",style:{marginBottom:10},children:[
       jsxs("button",{type:"button",className:"kl-btn",disabled:state.refreshing,onClick:function(){load(true)},children:[
         jsx(SvgRefresh,{className:state.refreshing?"kl-spinning":""}),
-        state.refreshing?klT("refreshing"):klT("refreshAll")
+        state.refreshing?t("refreshing"):t("refreshAll")
       ]})
     ]}),
-    state.loading?jsx("div",{className:"kl-meta",children:klT("loading")}):null,
+    state.loading?jsx("div",{className:"kl-meta",children:t("loading")}):null,
     !state.loading&&!state.subscriptions.length?jsxs("div",{className:"kl-empty",children:[
       jsx(SvgKey,{size:24,className:"kl-emptyIcon"}),
-      jsx("div",{children:klT("noSubs")})
+      jsx("div",{children:t("noSubs")})
     ]}):null,
     jsx("div",{className:"kl-list",children:state.subscriptions.map(function(s){
       return jsx(SubCard,{key:s.id,sub:s,busy:state.refreshing,onRefresh:function(id){fetchWithTimeout(API+"/subs?refresh=1&id="+encodeURIComponent(id),{cache:"no-store"}).then(function(){load(false)})},onDelete:del});
@@ -131,22 +139,25 @@ function ConfigFields(props){
     var scope = scopeRef.current;
     if (!scope) { setSt(function(x){ return Object.assign({}, x, { status: "unavailable" }); }); return; }
     var cancelled = false;
-    Promise.all([
-      Promise.resolve(scope.get()),
-      fetchWithTimeout(API + "/subs", { cache: "no-store" }).then(function(r){ return r.json(); }).catch(function(){ return {}; })
-    ]).then(function(res){
-      if (cancelled) return;
-      var snap = res[0];
-      var subsData = res[1] || {};
-      var subs = subsData.subscriptions || [];
-      if (snap && typeof snap === "object" && "status" in snap) {
-        if (snap.status === "loading") { setSt(function(x){ return Object.assign({}, x, { status: "loading" }); }); return; }
-        if (snap.status === "unavailable") { setSt(function(x){ return Object.assign({}, x, { status: "unavailable" }); }); return; }
+
+    function applySnapshot(snap, subs) {
+      if (!snap) {
+        setSt(function(x){ return Object.assign({}, x, { status: "unavailable" }); });
+        return;
       }
-      var vals = (snap && snap.values) ? snap.values : snap;
+      if (snap.status === "loading") {
+        setSt(function(x){ return Object.assign({}, x, { status: "loading" }); });
+        return;
+      }
+      if (snap.status === "unavailable") {
+        setSt(function(x){ return Object.assign({}, x, { status: "unavailable" }); });
+        return;
+      }
+      var vals = (snap.value !== undefined) ? snap.value : ((snap.values !== undefined) ? snap.values : snap);
       var ui = (vals && vals.ui) || {};
       var existingOrder = Array.isArray(ui.order) ? ui.order.slice() : [];
-      var subsIds = subs.map(function(x){ return x.id; });
+      var subsList = subs || [];
+      var subsIds = subsList.map(function(x){ return x.id; });
       for (var i = 0; i < subsIds.length; i++) {
         if (existingOrder.indexOf(subsIds[i]) === -1) existingOrder.push(subsIds[i]);
       }
@@ -159,31 +170,70 @@ function ConfigFields(props){
         composerBar: ui.composerBar !== false,
         activeOnTop: ui.activeOnTop !== false,
         order: existingOrder,
-        subsList: subs
+        subsList: subsList
       }); });
-    }).catch(function(){ if (!cancelled) setSt(function(x){ return Object.assign({}, x, { status: "unavailable" }); }); });
-    return function(){ cancelled = true; };
+    }
+
+    var unsub = null;
+    if (typeof scope.subscribe === "function") {
+      unsub = scope.subscribe(function(){
+        if (cancelled) return;
+        var currentSnap = typeof scope.getSnapshot === "function" ? scope.getSnapshot() : null;
+        if (currentSnap) applySnapshot(currentSnap, s.subsList);
+      });
+    }
+
+    var initialSnap = typeof scope.getSnapshot === "function" ? scope.getSnapshot() : null;
+    fetchWithTimeout(API + "/subs", { cache: "no-store" })
+      .then(function(r){ return r.json(); })
+      .then(function(subsData){
+        if (cancelled) return;
+        var subs = subsData.subscriptions || [];
+        var snap = (typeof scope.getSnapshot === "function") ? scope.getSnapshot() : initialSnap;
+        applySnapshot(snap, subs);
+      })
+      .catch(function(){
+        if (cancelled) return;
+        var snap = (typeof scope.getSnapshot === "function") ? scope.getSnapshot() : initialSnap;
+        applySnapshot(snap, []);
+      });
+
+    return function(){
+      cancelled = true;
+      if (typeof unsub === "function") unsub();
+    };
   }, [ctx]);
 
   function save(){
     var scope = scopeRef.current;
     if (!scope) { setSt(function(x){ return Object.assign({}, x, { msg: "configForms unavailable" }); }); return; }
     setSt(function(x){ return Object.assign({}, x, { saving: true, msg: "" }); });
-    var payload = {
-      storageDir: String(s.storageDir || ""),
-      refreshHours: Number(s.refreshHours) || 24,
-      ui: {
-        floatChip: !!s.floatChip,
-        composerBar: !!s.composerBar,
-        activeOnTop: !!s.activeOnTop,
-        order: s.order || []
-      },
-    };
-    Promise.all(Object.keys(payload).map(function(k){ return scope.set(k, payload[k]); })).then(function(){
-      setSt(function(x){ return Object.assign({}, x, { saving: false, msg: t("saved") || "Saved" }); });
-    }).catch(function(e){
-      setSt(function(x){ return Object.assign({}, x, { saving: false, msg: String(e && e.message || e) }); });
-    });
+    var ops = [
+      { op: "set", path: ["refreshHours"], value: Number(s.refreshHours) || 24 },
+      { op: "set", path: ["ui", "floatChip"], value: !!s.floatChip },
+      { op: "set", path: ["ui", "composerBar"], value: !!s.composerBar },
+      { op: "set", path: ["ui", "activeOnTop"], value: !!s.activeOnTop }
+    ];
+    if (typeof scope.mutate === "function") {
+      scope.mutate(ops).then(function(ok){
+        if (ok === false) {
+          setSt(function(x){ return Object.assign({}, x, { saving: false, msg: t("saveError") || "Save rejected" }); });
+          return;
+        }
+        setSt(function(x){ return Object.assign({}, x, { saving: false, msg: t("saved") || "Saved" }); });
+      }).catch(function(e){
+        setSt(function(x){ return Object.assign({}, x, { saving: false, msg: String(e && e.message || e) }); });
+      });
+    } else if (typeof scope.set === "function") {
+      Promise.all([
+        scope.set("refreshHours", Number(s.refreshHours) || 24),
+        scope.set("ui", { floatChip: !!s.floatChip, composerBar: !!s.composerBar, activeOnTop: !!s.activeOnTop, order: s.order || [] })
+      ]).then(function(){
+        setSt(function(x){ return Object.assign({}, x, { saving: false, msg: t("saved") || "Saved" }); });
+      }).catch(function(e){
+        setSt(function(x){ return Object.assign({}, x, { saving: false, msg: String(e && e.message || e) }); });
+      });
+    }
   }
 
   if (s.status === "loading") return jsx("div",{className:"kl-meta",children:t("loading")});
@@ -418,11 +468,12 @@ try {
 function KeyLimitsSettingsForm(props){
   var ctx=(props&&props.ctx)||klCtx;
   var lang=useActiveLocale(ctx),
+      boundT=(ctx&&ctx.locale&&typeof ctx.locale.bind==="function")?ctx.locale.bind(NS):null,
       dict=lang==="zh"?KL_zh:KL_en,
-      t=(typeof props.t==="function")?props.t:makeT(dict,KL_en);
+      t=(typeof props.t==="function")?props.t:(typeof boundT==="function"?boundT:makeT(dict,KL_en));
   return jsxs("div",{className:"kl-page",children:[
     jsx(ConfigFields,{ctx:ctx,t:t}),
-    jsx(KeysSettingsBody,{}),
+    jsx(KeysSettingsBody,{t:t}),
     jsx(BackupSection,{ctx:ctx,t:t}),
     jsx(UpdaterSection,{ctx:ctx,t:t})
   ]});
@@ -434,8 +485,9 @@ function KeyLimitsSettingsForm(props){
 function KeyLimitsPluginCard(props){
   var ctx = (props && props.ctx) || klCtx;
   var lang = useActiveLocale(ctx),
+      boundT = (ctx && ctx.locale && typeof ctx.locale.bind === "function") ? ctx.locale.bind(NS) : null,
       dict = lang === "zh" ? KL_zh : KL_en,
-      t = (typeof props.t === "function") ? props.t : makeT(dict, KL_en),
+      t = (typeof props.t === "function") ? props.t : (typeof boundT === "function" ? boundT : makeT(dict, KL_en)),
       st = useState(false),
       open = st[0],
       setOpen = st[1];
@@ -455,7 +507,7 @@ function KeyLimitsPluginCard(props){
     ]}),
     open?jsxs("div",{className:"kl-body",children:[
       jsx(ConfigFields,{ctx:ctx,t:t}),
-      jsx(KeysSettingsBody,{}),
+      jsx(KeysSettingsBody,{t:t}),
       jsx(BackupSection,{ctx:ctx,t:t}),
       jsx(UpdaterSection,{ctx:ctx,t:t})
     ]}):null
@@ -465,14 +517,17 @@ function KeyLimitsPluginCard(props){
 function registerKeyLimitsSettings(ctx){
   function addLocale(locale, dictionary) {
     try {
-      return ctx.locale.register(NS, locale, dictionary)
+      if (ctx && ctx.locale && typeof ctx.locale.register === "function") {
+        return ctx.locale.register(NS, locale, dictionary);
+      }
+      return function () {};
     } catch (alreadyTaken) {
-      return function () {}
+      return function () {};
     }
   }
   ctx.effect(function () {
-    var undo = [addLocale('en', KL_en), addLocale('zh', KL_zh)]
-    return function () { undo.forEach(function (off) { off() }) }
+    var undo = [addLocale('en', KL_en), addLocale('zh', KL_zh)];
+    return function () { undo.forEach(function (off) { try { off(); } catch (_) {} }); };
   }, "key-limits: locale");
   function loc(){return useActiveLocale(ctx)}
   // Register into the seats the host actually renders, newest first:
