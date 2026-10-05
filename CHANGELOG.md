@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.2.18
+
+### Security Hardening, Cryptographic Matching & Session Bounding
+- **Safe Logger Resolution (#128)**:
+  - Guarded `ctx.logger` check in `lib/index.js` using `typeof ctx.logger === 'function' ? ctx.logger('dsh-key-limits') : (ctx.logger || ctx)`, preventing `TypeError` crashes when host logger is passed as an object.
+- **Bounded In-Memory Session Storage (#130)**:
+  - Enforced an LRU eviction limit (`MAX_LIVE_SESSIONS = 500`) on the internal `live` Map in `lib/index.js`, preventing unbounded memory growth in long-running processes with thousands of chat sessions.
+  - Added `session/deleted` event listener to immediately purge disposed sessions from memory.
+- **CSRF Defense-in-Depth for Internal Auth (#131)**:
+  - Hardened `isTrustedSettingsRequest` in `lib/http-utils.js` by evaluating `sec-fetch-site === 'cross-site'` before checking internal authorization headers, ensuring cross-site requests cannot bypass CSRF validation.
+- **Header-Based Gemini API Key Authentication (#132)**:
+  - Refactored `fetchGeminiQuota` in `lib/provider-extra-fetchers.js` to transmit API keys via the standard `x-goog-api-key` HTTP header rather than embedding them in the URL query string, preventing credential exposure in HTTP access and proxy logs.
+- **Cryptographic Fingerprint & Collision Prevention (#125)**:
+  - Upgraded `credentialFingerprint` in `lib/subs.js` to utilize Node.js native `crypto.createHash('sha256')` (16-byte hex), replacing the legacy 32-bit polynomial hash and eliminating collision hazards across subscriptions.
+  - Returns empty string when both secret and extra parameters are empty, preventing false fingerprint matches across unconfigured accounts.
+- **Multi-Provider Data Consumer Parity (#124, #126, #127, #129, #133)**:
+  - Verified and locked regression tests confirming nested balance and quota windows extraction, ID-preserving backup updates, settings service `describe()` lifecycle, and active extra logger coverage.
+
 ## 0.2.17
 
 ### Documentation Synchronization, Offline Test Guard & Project Hygiene
