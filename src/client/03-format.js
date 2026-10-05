@@ -41,22 +41,46 @@ function poolStats(subs){
   var total = list.length, healthy = 0, warning = 0, exhausted = 0;
   var byProvider = {};
   for (var i = 0; i < list.length; i++) {
-    var s = list[i];
+    var s = list[i] || {};
     var p = s.provider || "unknown";
     if (!byProvider[p]) byProvider[p] = { total: 0, healthy: 0, warning: 0, exhausted: 0 };
     byProvider[p].total++;
-    var wins = (s.quota && s.quota.windows) || [];
-    var rem = minRemaining(wins);
     var isErr = !!(s.quota && s.quota.error);
-    if (isErr || (rem != null && rem <= DANGER)) {
+    if (isErr) {
       exhausted++;
       byProvider[p].exhausted++;
-    } else if (rem != null && rem <= WARN) {
-      warning++;
-      byProvider[p].warning++;
+      continue;
+    }
+    if (s.balance && s.balance.remaining != null) {
+      var bRem = Number(s.balance.remaining);
+      if (!Number.isFinite(bRem) || bRem <= 0) {
+        exhausted++;
+        byProvider[p].exhausted++;
+      } else if (bRem <= 1) {
+        warning++;
+        byProvider[p].warning++;
+      } else {
+        healthy++;
+        byProvider[p].healthy++;
+      }
+      continue;
+    }
+    var wins = (s.quota && s.quota.windows) || [];
+    var rem = minRemaining(wins);
+    if (rem != null) {
+      if (rem <= DANGER) {
+        exhausted++;
+        byProvider[p].exhausted++;
+      } else if (rem <= WARN) {
+        warning++;
+        byProvider[p].warning++;
+      } else {
+        healthy++;
+        byProvider[p].healthy++;
+      }
     } else {
-      healthy++;
-      byProvider[p].healthy++;
+      exhausted++;
+      byProvider[p].exhausted++;
     }
   }
   return {
@@ -88,7 +112,8 @@ function findNearestReset(subs){
 
 var USAGE_HIST_KEY = "kl-usage-history";
 var MAX_HIST_AGE_MS = 24 * 3600000;
-var MAX_HIST_POINTS = 60;
+var MAX_HIST_POINTS = 144;
+var HIST_BUCKET_MS = 10 * 60000;
 
 function loadUsageHistory(){
   if (typeof localStorage === "undefined") return [];
@@ -111,7 +136,7 @@ function loadUsageHistory(){
   }
 }
 
-function recordUsageSnapshot(worst){
+function recordUsageSnapshot(worst, subId){
   if (typeof localStorage === "undefined" || worst == null) return;
   var q = Number(worst);
   if (!Number.isFinite(q)) return;
@@ -119,16 +144,22 @@ function recordUsageSnapshot(worst){
     var now = Date.now();
     var history = loadUsageHistory();
     var roundedQ = Math.round(q * 10) / 10;
+    var sid = subId || null;
     if (history.length > 0) {
       var last = history[history.length - 1];
-      if (now - last.t < 60000) {
+      if (now - last.t < HIST_BUCKET_MS) {
         last.q = roundedQ;
         last.t = now;
+        if (sid) last.subId = sid;
       } else {
-        history.push({ t: now, q: roundedQ });
+        var entry = { t: now, q: roundedQ };
+        if (sid) entry.subId = sid;
+        history.push(entry);
       }
     } else {
-      history.push({ t: now, q: roundedQ });
+      var firstEntry = { t: now, q: roundedQ };
+      if (sid) firstEntry.subId = sid;
+      history.push(firstEntry);
     }
     if (history.length > MAX_HIST_POINTS) {
       history = history.slice(history.length - MAX_HIST_POINTS);
@@ -140,10 +171,30 @@ function recordUsageSnapshot(worst){
 }
 
 function calcBurnRate(history){
-  var pts = Array.isArray(history) ? history : [];
+  var raw = Array.isArray(history) ? history : [];
+  if (raw.length < 2) return { rate: 0, hoursLeft: null, idle: true };
+
+  var lastSubId = raw[raw.length - 1] && raw[raw.length - 1].subId;
+  var pts = [];
+  for (var i = 0; i < raw.length; i++) {
+    var p = raw[i];
+    if (!lastSubId || !p.subId || p.subId === lastSubId) {
+      pts.push(p);
+    }
+  }
   if (pts.length < 2) return { rate: 0, hoursLeft: null, idle: true };
-  var first = pts[0];
-  var last = pts[pts.length - 1];
+
+  var startIdx = 0;
+  for (var j = 1; j < pts.length; j++) {
+    if (pts[j].q > pts[j - 1].q + 5) {
+      startIdx = j;
+    }
+  }
+  var slice = pts.slice(startIdx);
+  if (slice.length < 2) return { rate: 0, hoursLeft: null, idle: true };
+
+  var first = slice[0];
+  var last = slice[slice.length - 1];
   var dtHours = (last.t - first.t) / 3600000;
   if (dtHours < (5 / 60)) return { rate: 0, hoursLeft: null, idle: true };
   var dq = first.q - last.q;
@@ -221,13 +272,65 @@ function UsageSparkline(props){
 function readPos(){try{var r=JSON.parse(localStorage.getItem(POS_KEY)||"null");if(r&&typeof r.x==="number"&&typeof r.y==="number")return r}catch(e){/* best-effort: corrupt or restricted localStorage falls back to default pos */}return null}
 function savePos(x,y){try{localStorage.setItem(POS_KEY,JSON.stringify({x:x,y:y}))}catch(e){/* best-effort: storage quota exceeded or disabled */}}
 function PortalModal(props){
+  var prevFocusRef = useRef(null);
+  var containerRef = useRef(null);
+
   useEffect(function(){
-    if(typeof window==="undefined"||!props.onClose)return;
-    function onKey(e){if(e.key==="Escape")props.onClose()}
-    window.addEventListener("keydown",onKey);
-    return function(){window.removeEventListener("keydown",onKey)};
-  },[props.onClose]);
-  return createPortal(props.children,document.body);
+    if (typeof document !== "undefined") {
+      prevFocusRef.current = document.activeElement;
+    }
+    return function(){
+      if (prevFocusRef.current && typeof prevFocusRef.current.focus === "function") {
+        try { prevFocusRef.current.focus(); } catch(e) {}
+      }
+    };
+  }, []);
+
+  useEffect(function(){
+    if (typeof window === "undefined") return;
+    function onKeyDown(e){
+      if (e.key === "Escape" && props.onClose) {
+        e.preventDefault();
+        props.onClose();
+        return;
+      }
+      if (e.key === "Tab" && containerRef.current) {
+        var focusable = containerRef.current.querySelectorAll(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (!focusable.length) return;
+        var first = focusable[0];
+        var last = focusable[focusable.length - 1];
+        if (e.shiftKey) {
+          if (document.activeElement === first || !containerRef.current.contains(document.activeElement)) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last || !containerRef.current.contains(document.activeElement)) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return function(){ window.removeEventListener("keydown", onKeyDown); };
+  }, [props.onClose]);
+
+  if (typeof document === "undefined") return null;
+  var ariaLabel = props.ariaLabel || props["aria-label"] || "Dialog";
+  return createPortal(
+    jsx("div", {
+      ref: containerRef,
+      role: "dialog",
+      "aria-modal": "true",
+      "aria-label": ariaLabel,
+      className: "kl-modal-container",
+      children: props.children
+    }),
+    document.body
+  );
 }
 function providerLabel(p){return p||"?"}
 function providerClass(p){

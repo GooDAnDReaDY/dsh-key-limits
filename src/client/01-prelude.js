@@ -705,15 +705,20 @@ var css = `
 function ensureKeyLimitsStyles(){
   if(typeof document==="undefined")return function(){};
   var existing=document.querySelector('style[data-dsh-plugin="dsh-key-limits"]');
-  if(existing)return function(){};
+  if(existing){
+    return function(){
+      try{existing.remove()}catch(e){}
+    };
+  }
   var tag=document.createElement("style");
   tag.dataset.dshPlugin="dsh-key-limits";
   tag.setAttribute("data-dsh-plugin","dsh-key-limits");
   tag.textContent=css;
   document.head.appendChild(tag);
-  return function(){tag.remove()};
+  return function(){
+    try{tag.remove()}catch(e){}
+  };
 }
-ensureKeyLimitsStyles();
 
 var DEFAULT_CLIENT_TIMEOUT_MS = 15000;
 function fetchWithTimeout(url, opts, timeoutMs) {
@@ -733,5 +738,22 @@ function fetchWithTimeout(url, opts, timeoutMs) {
     });
   }
   return fetch(url, options);
+}
+
+function fetchJson(url, opts, timeoutMs) {
+  return fetchWithTimeout(url, opts, timeoutMs).then(function(res){
+    return res.json().catch(function(){
+      return { error: "HTTP " + res.status + " " + (res.statusText || "") };
+    }).then(function(data){
+      if (!res.ok) {
+        var msg = (data && data.error) ? data.error : ("HTTP " + res.status);
+        var err = new Error(msg);
+        err.status = res.status;
+        err.data = data;
+        throw err;
+      }
+      return data;
+    });
+  });
 }
 

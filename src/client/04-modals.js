@@ -60,6 +60,7 @@ function OneLimitModal(props){
   if (!d) return null;
   var sub = d.sub || {}, wins = (d.quota && d.quota.windows) || [], title = providerLabel(sub.provider || (d.route && d.route.provider)), subline = (sub.label || "").trim();
   return jsx(PortalModal, {
+    ariaLabel: title || klT("activeSessionEyebrow"),
     onClose: onClose,
     children: jsx("div", {
       className: "kl-overlay",
@@ -78,7 +79,7 @@ function OneLimitModal(props){
                   subline ? jsx("div", { className: "kl-panelSub", children: subline }) : null
                 ]
               }),
-              jsx("button", { type: "button", className: "kl-close", onClick: onClose, children: jsx(SvgClose, {}) })
+              jsx("button", { type: "button", className: "kl-close", "aria-label": klT("close") || "Close", onClick: onClose, children: jsx(SvgClose, {}) })
             ]
           }),
           jsxs("div", {
@@ -136,6 +137,7 @@ function SubCard(props){
                 className: "kl-btnIcon",
                 disabled: busy,
                 title: klT("refresh"),
+                "aria-label": klT("refresh") || "Refresh",
                 onClick: function(){ onRefresh(s.id); },
                 children: jsx(SvgRefresh, { className: busy ? "kl-spinning" : "" })
               }) : null,
@@ -143,6 +145,7 @@ function SubCard(props){
                 type: "button",
                 className: "kl-btnIcon kl-btnDanger",
                 title: klT("delete"),
+                "aria-label": klT("delete") || "Delete",
                 onClick: function(){ onDelete(s.id, s.label || s.id); },
                 children: jsx(SvgTrash, {})
               }) : null
@@ -166,9 +169,9 @@ function AllLimitsModal(props){
     var q = refresh ? "?refresh=1" : "";
     if (refresh) setSt(function(s){ return Object.assign({}, s, { refreshing: true }); });
     Promise.all([
-      fetchWithTimeout(API + "/config", { cache: "no-store" }).then(function(r){ return r.json(); }).catch(function(){ return {}; }),
-      fetchWithTimeout(API + "/subs" + q, { cache: "no-store" }).then(function(r){ return r.json(); }),
-      fetchWithTimeout(API + "/active-sub?sessionId=" + encodeURIComponent(sessionIdFromCtx()), { cache: "no-store" }).then(function(r){ return r.json(); }).catch(function(){ return null; })
+      fetchJson(API + "/config", { cache: "no-store" }).catch(function(){ return {}; }),
+      fetchJson(API + "/subs" + q, { cache: "no-store" }),
+      fetchJson(API + "/active-sub?sessionId=" + encodeURIComponent(sessionIdFromCtx()), { cache: "no-store" }).catch(function(){ return null; })
     ]).then(function(res){
       var cfg = res[0] || {};
       var j = res[1] || {};
@@ -177,7 +180,7 @@ function AllLimitsModal(props){
       setSt(function(s){
         return Object.assign({}, s, {
           loading: false,
-          subscriptions: j.subscriptions || [],
+          subscriptions: Array.isArray(j.subscriptions) ? j.subscriptions : s.subscriptions,
           refreshing: !!j.refreshing,
           order: Array.isArray(ui.order) ? ui.order : [],
           activeOnTop: ui.activeOnTop !== false,
@@ -190,7 +193,7 @@ function AllLimitsModal(props){
         return Object.assign({}, s, {
           loading: false,
           refreshing: false,
-          err: String(e && e.message || e)
+          err: String((e && e.message) || e)
         });
       });
     });
@@ -204,13 +207,12 @@ function AllLimitsModal(props){
 
   function refreshOne(id){
     setSt(function(s){ return Object.assign({}, s, { refreshing: true }); });
-    fetchWithTimeout(API + "/subs?refresh=1&id=" + encodeURIComponent(id), { cache: "no-store" })
-      .then(function(r){ return r.json(); })
+    fetchJson(API + "/subs?refresh=1&id=" + encodeURIComponent(id), { cache: "no-store" })
       .then(function(j){
         setSt(function(s){
           return Object.assign({}, s, {
             loading: false,
-            subscriptions: j.subscriptions || [],
+            subscriptions: Array.isArray(j.subscriptions) ? j.subscriptions : s.subscriptions,
             refreshing: !!j.refreshing,
             err: ""
           });
@@ -220,7 +222,7 @@ function AllLimitsModal(props){
         setSt(function(s){
           return Object.assign({}, s, {
             refreshing: false,
-            err: String(e && e.message || e)
+            err: String((e && e.message) || e)
           });
         });
       });
@@ -228,16 +230,16 @@ function AllLimitsModal(props){
 
   function refreshAll(){
     setSt(function(s){ return Object.assign({}, s, { refreshing: true }); });
-    fetchWithTimeout(API + "/refresh-all", {
+    fetchJson(API + "/refresh-all", {
       method: "POST",
       headers: { "x-dsh-internal-auth": "1" }
     })
-      .then(function(){ load(true); })
+      .then(function(){ load(false); })
       .catch(function(e){
         setSt(function(s){
           return Object.assign({}, s, {
             refreshing: false,
-            err: String(e && e.message || e)
+            err: String((e && e.message) || e)
           });
         });
       });
@@ -245,11 +247,11 @@ function AllLimitsModal(props){
 
   function deleteOne(id, label){
     if (!confirm(klT("deleteConfirm") + label + "»?")) return;
-    fetchWithTimeout(API + "/subs?id=" + encodeURIComponent(id), { method: "DELETE" })
+    fetchJson(API + "/subs?id=" + encodeURIComponent(id), { method: "DELETE" })
       .then(function(){ load(false); })
       .catch(function(e){
         setSt(function(s){
-          return Object.assign({}, s, { err: String(e && e.message || e) });
+          return Object.assign({}, s, { err: String((e && e.message) || e) });
         });
       });
   }
@@ -296,6 +298,7 @@ function AllLimitsModal(props){
   });
 
   return jsx(PortalModal, {
+    ariaLabel: klT("allTitle"),
     onClose: onClose,
     children: jsx("div", {
       className: "kl-overlay",
@@ -326,6 +329,7 @@ function AllLimitsModal(props){
                     type: "button",
                     className: "kl-btn kl-btn-ghost kl-btn-refresh-all",
                     title: klT("refreshAll"),
+                    "aria-label": klT("refreshAll"),
                     onClick: refreshAll,
                     disabled: state.refreshing,
                     children: [
@@ -333,7 +337,7 @@ function AllLimitsModal(props){
                       jsx("span", { style: { marginLeft: 5 }, children: state.refreshing ? klT("refreshing") : klT("refreshAll") })
                     ]
                   }),
-                  jsx("button", { type: "button", className: "kl-close", onClick: onClose, children: jsx(SvgClose, {}) })
+                  jsx("button", { type: "button", className: "kl-close", "aria-label": klT("close") || "Close", onClick: onClose, children: jsx(SvgClose, {}) })
                 ]
               })
             ]
@@ -427,7 +431,8 @@ function AllLimitsModal(props){
                     type: "button",
                     className: "kl-btn",
                     disabled: state.refreshing,
-                    onClick: function(){ load(true); },
+                    "aria-label": klT("refreshAll"),
+                    onClick: refreshAll,
                     children: [
                       jsx(SvgRefresh, { className: state.refreshing ? "kl-spinning" : "" }),
                       state.refreshing ? klT("refreshing") : klT("refreshAll")

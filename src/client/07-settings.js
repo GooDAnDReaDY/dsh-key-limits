@@ -5,7 +5,7 @@ function AddKeyModal(props){
   var st=useState({loading:true,schemas:{},provider:"",label:"",secret:"",extra:"",err:"",saving:false});
   var s=st[0],setSt=st[1];
   useEffect(function(){
-    fetchWithTimeout(API+"/config",{cache:"no-store"}).then(function(r){return r.json()}).then(function(cfg){
+    fetchJson(API+"/config",{cache:"no-store"}).then(function(cfg){
       var sc=cfg.schemas||{};
       var first=Object.keys(sc)[0]||"";
       setSt(function(x){return Object.assign({},x,{loading:false,schemas:sc,provider:first})});
@@ -32,13 +32,13 @@ function AddKeyModal(props){
       }
     }
     setSt(function(x){return Object.assign({},x,{saving:true,err:""})});
-    fetchWithTimeout(API+"/subs",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({provider:s.provider,secret:s.secret,extra:s.extra,label:s.label})}).then(function(r){return r.json()}).then(function(j){
+    fetchJson(API+"/subs",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({provider:s.provider,secret:s.secret,extra:s.extra,label:s.label})}).then(function(j){
       if(j.error){setSt(function(x){return Object.assign({},x,{saving:false,err:j.error})});return}
       onSaved&&onSaved();onClose&&onClose();
     }).catch(function(e){setSt(function(x){return Object.assign({},x,{saving:false,err:String(e&&e.message||e)||t("saveError")})})});
   }
   var providerHint = schema ? (t("prov_hint_" + s.provider.replace(/-/g, "_")) || schema.hint) : null;
-  return jsx(PortalModal,{onClose:onClose,children:jsx("div",{className:"kl-overlay",onClick:onClose,children:
+  return jsx(PortalModal,{ariaLabel:t("addKey"),onClose:onClose,children:jsx("div",{className:"kl-overlay",onClick:onClose,children:
     jsxs("div",{className:"kl-panel",onClick:function(e){e.stopPropagation()},children:[
       jsxs("div",{className:"kl-panelHead",children:[
         jsxs("div",{children:[
@@ -48,12 +48,12 @@ function AddKeyModal(props){
           ]}),
           jsx("div",{className:"kl-panelSub",children:t("pickProvider")})
         ]}),
-        jsx("button",{type:"button",className:"kl-close",onClick:onClose,children:jsx(SvgClose,{})})
+        jsx("button",{type:"button",className:"kl-close","aria-label":t("close")||"Close",onClick:onClose,children:jsx(SvgClose,{})})
       ]}),
       jsx("div",{className:"kl-panelBody",children:s.loading?jsx("div",{className:"kl-meta",children:t("loading")}):jsxs(React.Fragment,{children:[
         jsxs("div",{className:"kl-field",children:[
           jsx("div",{className:"kl-fieldLabel",children:t("pickProvider")}),
-          jsxs("select",{className:"kl-input",value:s.provider,onChange:function(e){
+          jsxs("select",{className:"kl-input","aria-label":t("pickProvider"),value:s.provider,onChange:function(e){
             var np = e.target.value;
             setSt(function(x){return Object.assign({},x,{provider:np,secret:"",extra:"",err:""})});
           },children:[
@@ -66,7 +66,7 @@ function AddKeyModal(props){
           ]})
         ]}),
         providerHint?jsx("div",{className:"kl-meta",children:providerHint}):null,
-        jsxs("div",{className:"kl-field",children:[jsx("div",{className:"kl-fieldLabel",children:t("labelOptional")}),jsx("input",{className:"kl-input",value:s.label,onChange:function(e){setSt(function(x){return Object.assign({},x,{label:e.target.value})})}})]}),
+        jsxs("div",{className:"kl-field",children:[jsx("div",{className:"kl-fieldLabel",children:t("labelOptional")}),jsx("input",{className:"kl-input","aria-label":t("labelOptional"),value:s.label,onChange:function(e){setSt(function(x){return Object.assign({},x,{label:e.target.value})})}})]}),
         fields.map(function(f){
           var isSec = f.secret !== false;
           var val = f.key === "extra" ? s.extra : s.secret;
@@ -75,6 +75,7 @@ function AddKeyModal(props){
             jsx("div",{className:"kl-fieldLabel",children:labelText}),
             jsx("input",{
               className:"kl-input",
+              "aria-label": labelText,
               type: isSec ? "password" : "text",
               placeholder: f.placeholder || "",
               value: val,
@@ -117,16 +118,69 @@ function KeysInlineList(props){
   var t=(props&&props.t)||klT;
   var st=useState({loading:true,subscriptions:[],refreshing:false,err:""});
   var state=st[0],setSt=st[1];
-  function load(refresh){
-    fetchWithTimeout(API+"/subs"+(refresh?"?refresh=1":""),{cache:"no-store"}).then(function(r){return r.json()}).then(function(j){
-      setSt({loading:false,subscriptions:j.subscriptions||[],refreshing:!!j.refreshing,err:""});
-    }).catch(function(e){setSt(function(s){return Object.assign({},s,{loading:false,err:String(e&&e.message||e)})})});
+  var pollTimerRef = useRef(null);
+  var pollCountRef = useRef(0);
+
+  function schedulePoll(){
+    if (pollTimerRef.current) clearTimeout(pollTimerRef.current);
+    if (pollCountRef.current >= 10) {
+      pollCountRef.current = 0;
+      setSt(function(s){ return Object.assign({}, s, { refreshing: false }); });
+      return;
+    }
+    pollCountRef.current++;
+    pollTimerRef.current = setTimeout(function(){
+      load(false);
+    }, 1000);
   }
-  useEffect(function(){load(false)},[]);
+
+  function load(refresh){
+    fetchJson(API+"/subs"+(refresh?"?refresh=1":""),{cache:"no-store"}).then(function(j){
+      var isRef = !!j.refreshing;
+      setSt(function(s){
+        return {
+          loading: false,
+          subscriptions: Array.isArray(j.subscriptions) ? j.subscriptions : s.subscriptions,
+          refreshing: isRef,
+          err: ""
+        };
+      });
+      if (isRef) {
+        schedulePoll();
+      } else {
+        pollCountRef.current = 0;
+        if (pollTimerRef.current) clearTimeout(pollTimerRef.current);
+      }
+    }).catch(function(e){
+      pollCountRef.current = 0;
+      setSt(function(s){
+        return Object.assign({}, s, {
+          loading: false,
+          refreshing: false,
+          err: String((e && e.message) || e)
+        });
+      });
+    });
+  }
+
+  useEffect(function(){
+    load(false);
+    return function(){
+      if (pollTimerRef.current) clearTimeout(pollTimerRef.current);
+    };
+  }, []);
+
   function del(id,label){
     if(!confirm(t("deleteConfirm")+label+"»?"))return;
-    fetchWithTimeout(API+"/subs?id="+encodeURIComponent(id),{method:"DELETE"}).then(function(){load(false)});
+    fetchJson(API+"/subs?id="+encodeURIComponent(id),{method:"DELETE"})
+      .then(function(){ load(false); })
+      .catch(function(e){
+        setSt(function(s){
+          return Object.assign({}, s, { err: String((e && e.message) || e) });
+        });
+      });
   }
+
   return jsxs("div",{children:[
     jsxs("div",{className:"kl-toolbar",style:{marginBottom:10},children:[
       jsxs("button",{type:"button",className:"kl-btn",disabled:state.refreshing,onClick:function(){load(true)},children:[
@@ -140,7 +194,22 @@ function KeysInlineList(props){
       jsx("div",{children:t("noSubs")})
     ]}):null,
     jsx("div",{className:"kl-list",children:state.subscriptions.map(function(s){
-      return jsx(SubCard,{key:s.id,sub:s,busy:state.refreshing,onRefresh:function(id){fetchWithTimeout(API+"/subs?refresh=1&id="+encodeURIComponent(id),{cache:"no-store"}).then(function(){load(false)})},onDelete:del});
+      return jsx(SubCard,{
+        key:s.id,
+        sub:s,
+        busy:state.refreshing,
+        onRefresh:function(id){
+          setSt(function(s){ return Object.assign({}, s, { refreshing: true, err: "" }); });
+          fetchJson(API+"/subs?refresh=1&id="+encodeURIComponent(id),{cache:"no-store"})
+            .then(function(){ load(false); })
+            .catch(function(e){
+              setSt(function(s){
+                return Object.assign({}, s, { refreshing: false, err: String((e && e.message) || e) });
+              });
+            });
+        },
+        onDelete:del
+      });
     })}),
     state.err?jsxs("div",{className:"kl-alertError",children:[jsx(SvgAlert,{}),jsx("span",{children:state.err})]}):null
   ]});
@@ -357,6 +426,11 @@ function UpdaterSection(props){
       });
   }
 
+  var showRetry = s.data && s.data.latestCheckFailed;
+  var showUpdateBtn = s.data && s.data.updateAvailable && s.data.canAutoUpdate !== false;
+  var showManualNotice = s.data && s.data.updateAvailable && s.data.canAutoUpdate === false;
+  var showUpToDate = s.data && !s.data.updateAvailable && !s.data.latestCheckFailed;
+
   return jsxs("div",{style:{marginTop:16,paddingTop:12,borderTop:"1px solid var(--dsw-alias-border-l2)"},children:[
     jsxs("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between"},children:[
       jsxs("div",{className:"kl-meta",children:[
@@ -364,11 +438,14 @@ function UpdaterSection(props){
         s.data && s.data.updateAvailable ? (" → v" + s.data.latestVersion) : ""
       ]}),
       jsx("div",{children:
-        s.data && s.data.updateAvailable ?
+        showUpdateBtn ?
           jsx("button",{type:"button",className:"kl-btn kl-btnPrimary",disabled:s.updating,onClick:triggerUpdate,children:s.updating ? t("updating") : t("updateNow")}) :
-          jsx("button",{type:"button",className:"kl-btn",disabled:s.checking,onClick:check,children:s.checking ? t("checkingUpdates") : (s.data ? t("upToDate") : t("checkForUpdates"))})
+        showRetry ?
+          jsx("button",{type:"button",className:"kl-btn",disabled:s.checking,onClick:check,children:s.checking ? t("checkingUpdates") : (t("checkFailed") + " (" + t("retry") + ")")}) :
+          jsx("button",{type:"button",className:"kl-btn",disabled:s.checking,onClick:check,children:s.checking ? t("checkingUpdates") : (showUpToDate ? t("upToDate") : t("checkForUpdates"))})
       })
     ]}),
+    showManualNotice ? jsx("div",{className:"kl-meta",style:{color:"var(--dsw-alias-state-warning)",marginTop:6},children:t("manualUpdateCmd")}):null,
     s.notice ? jsx("div",{className:"kl-meta",style:{color:"var(--dsw-alias-state-success)",marginTop:6},children:s.notice}) : null,
     s.error ? jsx("div",{className:"kl-alertError",style:{marginTop:6},children:s.error}) : null
   ]});

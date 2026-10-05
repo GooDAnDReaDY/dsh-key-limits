@@ -1,5 +1,40 @@
 # Changelog
 
+## 0.2.16
+
+### UI Lifecycle, Refresh Completion & Accessibility Hardening
+- **Refresh Completion & Redundant Refresh Removal (#110)**:
+  - Added bounded polling in `KeysInlineList` to automatically poll until `refreshing` completes (clearing stuck spinning state after async provider refresh).
+  - Fixed `AllLimitsModal` "Refresh All" to query refreshed cards with `load(false)` instead of initiating a duplicate provider fetch via `load(true)`.
+- **Client Error Handling & Structured HTTP Rejection (#111)**:
+  - Added `fetchJson` helper rejecting non-2xx responses with structured error objects preserving error details.
+  - Guarded `KeysInlineList` subscription state: network or server errors (403/500) now preserve existing subscription lists instead of wiping to an empty list `[]`.
+  - Added promise rejection handlers and user-facing error notices to inline deletion and card refresh actions.
+- **Dynamic Refresh Interval & Composer Bar Setting (#112)**:
+  - Wired `refreshHours` setting to runtime background timers and cache staleness checks via dynamic `getRefreshIntervalMs()` instead of a fixed 60s hardcoded constant.
+  - Included live `ui` configuration in `/active-sub` endpoint responses.
+  - Enabled `ActiveKeyButton` in the composer bar to respect `ui.composerBar === false` by hiding the widget when disabled.
+- **Client Style Tag Lifecycle Management (#113)**:
+  - Removed top-level style injection at module evaluation; style tag insertion is now strictly bound to `ctx.effect`.
+  - Returned robust teardown callback ensuring `<style>` tag is removed from document `<head>` on plugin disposal or hot reload.
+- **Active Key Scoped Danger Toast (#114)**:
+  - Scoped FloatChip danger alert to evaluate critical thresholds (quota <= 15% or zero balance) only on the subscription active in the current session.
+  - Partitioned toast cooldown keys per account (`kl-last-danger-toast-${subId}`) in browser session storage, preventing alerts on one key from silencing alerts on another.
+- **24-Hour Usage Trend Downsampling & Reset Handling (#115)**:
+  - Expanded usage history storage to 144 points with 10-minute bucket downsampling (`HIST_BUCKET_MS = 600000`), accurately covering a full 24-hour horizon.
+  - Enhanced `calcBurnRate` to detect quota replenishment or key changes (`q > prev.q + 5`), calculating burn rate from the latest cycle without false consumption spikes.
+- **Pool Health Monetary Balance & Missing Data Semantics (#116)**:
+  - Corrected `poolStats` to classify subscriptions with zero monetary balance (`balance.remaining: 0`) as `exhausted` rather than `healthy`.
+  - Classified uninitialized or missing quota data without active balance as `exhausted` (failure/missing data state).
+- **Modal Accessibility & Focus Management (#117)**:
+  - Added modal dialog semantics (`role="dialog"`, `aria-modal="true"`, `aria-label`) to `PortalModal`.
+  - Implemented keyboard Tab/Shift+Tab focus trapping within open dialogs and focus restoration to the previously active element upon close.
+  - Added accessible labels to close buttons and credential form inputs in `AddKeyModal`, `OneLimitModal`, and `AllLimitsModal`.
+- **Updater Registry Failure & Manual Fallback Display (#118)**:
+  - Handled `latestCheckFailed: true` from registry checks by rendering a distinct "Check failed" state with a retry button instead of falsely claiming "Up to date".
+  - Displayed explicit manual update instructions (`pnpm update @goodandready/dsh-key-limits`) when updates are available in environments where auto-update is disabled (`canAutoUpdate: false`).
+
+
 ## 0.2.15
 
 ### Backup & Transport Integrity

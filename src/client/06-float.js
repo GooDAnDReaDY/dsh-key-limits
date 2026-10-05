@@ -40,36 +40,60 @@ function FloatChip(){
 
   useEffect(function(){
     function pull(){
-      fetchWithTimeout(API+"/config",{cache:"no-store"}).then(function(r){return r.json()}).then(function(cfg){
+      fetchJson(API+"/config",{cache:"no-store"}).then(function(cfg){
         var on=!(cfg.ui&&cfg.ui.floatChip===false);
         if(!on){setSt(function(s){return Object.assign({},s,{enabled:false})});return}
-        fetchWithTimeout(API+"/subs",{cache:"no-store"}).then(function(r){return r.json()}).then(function(j){
+        var curSid = sessionIdFromCtx();
+        var subsPromise = fetchJson(API+"/subs",{cache:"no-store"});
+        var activePromise = curSid ? fetchJson(API+"/active-sub?sessionId="+encodeURIComponent(curSid),{cache:"no-store"}).catch(function(){ return null; }) : Promise.resolve(null);
+        Promise.all([subsPromise, activePromise]).then(function(res){
+          var j = res[0] || {};
+          var activeData = res[1] || null;
           var subs=j.subscriptions||[],wMin=null,n=subs.length;
           for(var i=0;i<subs.length;i++){
             var w=(subs[i].quota&&subs[i].quota.windows)||[];
             var m=minRemaining(w);
             if(m!=null&&(wMin===null||m<wMin))wMin=m;
           }
-          if(wMin!=null) recordUsageSnapshot(wMin);
+          if(wMin!=null) recordUsageSnapshot(wMin, activeData ? activeData.subId : null);
           var nr = findNearestReset(subs);
           var text=n?(wMin!=null?fmtPct(wMin):String(n)):klT("activeNone");
           setSt(function(s){return Object.assign({},s,{enabled:true,label:text,worst:wMin,nearestReset:nr})});
 
-          // Danger Toast (#79)
-          if(wMin!=null && wMin<=DANGER){
-            try {
-              var lastToast = Number(sessionStorage.getItem("kl-last-danger-toast") || 0);
-              if (Date.now() - lastToast > 30 * 60000) {
-                sessionStorage.setItem("kl-last-danger-toast", String(Date.now()));
-                toastSt[1]({ rem: wMin });
-                setTimeout(function(){ toastSt[1](null); }, 6000);
+          // Danger Toast (#79 & issue 114): Scoped to active session subscription only
+          if(activeData && activeData.subId){
+            var isCrit = false;
+            var toastRem = null;
+            if(activeData.balance){
+              var bRem = Number(activeData.balance.remaining);
+              if(!Number.isFinite(bRem) || bRem <= 0){
+                isCrit = true;
+                toastRem = 0;
               }
-            } catch(err) {
-              /* best-effort: sessionStorage disabled or quota exceeded */
+            } else {
+              var aWins = (activeData.quota && activeData.quota.windows) || [];
+              var aRem = minRemaining(aWins);
+              if(aRem != null && aRem <= DANGER){
+                isCrit = true;
+                toastRem = aRem;
+              }
+            }
+            if(isCrit){
+              try {
+                var toastKey = "kl-last-danger-toast-" + activeData.subId;
+                var lastToast = Number(sessionStorage.getItem(toastKey) || 0);
+                if (Date.now() - lastToast > 30 * 60000) {
+                  sessionStorage.setItem(toastKey, String(Date.now()));
+                  toastSt[1]({ rem: toastRem != null ? toastRem : 0, label: (activeData.sub && activeData.sub.label) || activeData.subId });
+                  setTimeout(function(){ toastSt[1](null); }, 6000);
+                }
+              } catch(err) {
+                /* best-effort */
+              }
             }
           }
-        }).catch(function(){/* best-effort: transient /subs poll failure ignored */});
-      }).catch(function(){/* best-effort: transient /config poll failure ignored */});
+        }).catch(function(){/* best-effort */});
+      }).catch(function(){/* best-effort */});
     }
     pull();var t=setInterval(pull,REFRESH_MS);return function(){clearInterval(t)};
   },[]);
