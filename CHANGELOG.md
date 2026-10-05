@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.2.17
+
+### Documentation Synchronization, Offline Test Guard & Project Hygiene
+- **Offline Unit Test Guard & Provider Fast-Fail (#119)**:
+  - Added input validation fast-fail in `lib/provider-fetchers.js` for Ollama Cloud (`fetchOllamaQuota`), Qwen Cloud (`fetchQwenQuota`), Kimi, MiniMax, DeepSeek, and OpenRouter, returning structured errors immediately when required credentials or cookies are absent without touching external networks.
+  - Hardened unit tests in `test/providers-parsers.test.mjs` with mock fetch guards that throw on unexpected outbound calls, preventing accidental real HTTP requests to `https://ollama.com/api/me`.
+  - Added comprehensive transport tests verifying Ollama metadata and usage parsing against stubbed responses.
+- **Documentation Alignment Across Languages (#120)**:
+  - Synchronized `README.md`, `README.ru.md`, `README.zh.md`, and `docs/design/DESIGN.md` with the active Schemastery `Config` schema (`storageDir`, `refreshHours`, `ui.floatChip`, `ui.composerBar`, `ui.activeOnTop`, `ui.order`).
+  - Documented all 10 REST API endpoints: `/health`, `/config`, `/active-sub`, `/subs`, `/refresh-all`, `/export`, `/import`, and `/update`.
+  - Clarified UI slot registrations (`plugins.row.config` primary seat with `plugins.item` backward-compatible fallback).
+  - Clarified publication architecture, noting that npm and release packages distribute runtime production files, while dev sources and tests are maintained in the repository.
+  - Reconciled design decisions regarding lightweight in-memory analytics (rolling 24h burn rate and SVG sparkline).
+- **Internal Project Hygiene & Test Matrix (#121)**:
+  - Added repository-level `AGENTS.md` and `index.md` based on DEV standard templates, establishing constraints, architecture reference, and a 7-step reproducible verification matrix.
+  - Maintained strict publication hygiene by keeping `AGENTS.md` and `index.md` in `.gitignore` and `.gitattributes` (`export-ignore`), preventing exposure in npm tarballs and public GitHub mirrors.
+
 ## 0.2.16
 
 ### UI Lifecycle, Refresh Completion & Accessibility Hardening

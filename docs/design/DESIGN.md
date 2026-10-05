@@ -3,8 +3,8 @@
 ## Product / Purpose
 - **Назначение:** Отображение квот, оставшихся лимитов и балансов API-ключей/подписок провайдеров в DeepSeek Harness (DSH). Предотвращает внезапное исчерпание лимитов при диалогах с AI.
 - **Канонический путь репозитория:** `/mnt/external/Project/DEV/dhsplugins/dsh-key-limits` (согласно `dhs-plugin-release-workflow`).
-- **Аудитория:** Разработчики и пользователи DSH, использующие несколько провайдеров (OpenCode, DeepSeek, OpenRouter, Kimi, GLM, MiniMax, Cline, Ollama, Command Code).
-- **Статус:** Production-ready. Версия 0.2.10.
+- **Аудитория:** Разработчики и пользователи DSH, использующие несколько провайдеров (OpenCode GO, Ollama Cloud, Qwen Cloud, Kimi for Coding, GLM, MiniMax, Cline, DeepSeek, Command Code, OpenRouter, SiliconFlow, Anthropic, Groq, Google Gemini).
+- **Статус:** Production-ready. Версия 0.2.17.
 
 ---
 
@@ -15,18 +15,22 @@
   - `AllLimitsModal`: оверлей со всеми добавленными подписками, окнами квот (5h, weekly, monthly) и балансами.
   - `AddKeyModal`: диалог добавления ключа с валидацией провайдера и автоматическим тестом квоты.
 - **DSH UI / settings / slots:**
-  - `settings.plugin.item`: key = `dsh-key-limits` (`SETTINGS_NS`), карточка в «Настройки → Плагины → Настройки плагинов».
-  - `conversation.composer.bar`: id = `key-limits-active`.
+  - `plugins.row.config`: key = `@goodandready/dsh-key-limits:row-config`, первичный слот строки настроек плагина.
+  - `plugins.item`: key = `dsh-key-limits` (`SETTINGS_NS`), карточка в «Настройки → Плагины» (безопасный fallback).
+  - `conversation.composer.bar`: id = `key-limits-active`, кнопка в строке ввода сообщений.
   - Body Root: `#dsh-key-limits-root` для плавающего чипа.
 - **API:**
-  - `GET /dsh-key-limits/health` — проверка работоспособности.
-  - `GET /dsh-key-limits/config` — публичная конфигурация UI и схемы провайдеров (`schemas`).
+  - `GET /dsh-key-limits/health` — проверка работоспособности и сводка подписок.
+  - `GET /dsh-key-limits/config` — публичная конфигурация UI и схемы параметров провайдеров (`schemas`).
+  - `GET /dsh-key-limits/active-sub?session=` — привязка сессии к ключу, квоте и настройкам UI.
   - `GET /dsh-key-limits/subs` — список подписок, карточки квот, балансы.
   - `POST /dsh-key-limits/subs` — создание/обновление подписки (секреты в DSH credentials).
   - `DELETE /dsh-key-limits/subs?id=` — удаление подписки.
-  - `GET /dsh-key-limits/active-sub?sessionId=` — привязка сессии к ключу и квоте.
-  - `GET /dsh-key-limits/update` — статус обновлений из npmjs.
-  - `POST /dsh-key-limits/update` — запуск автообновления.
+  - `POST /dsh-key-limits/refresh-all` — пакетный опрос всех подписок с защитой от наложения (10с cooldown).
+  - `POST /dsh-key-limits/export` — экспорт зашифрованного паролем бэкапа подписок (AES-256-GCM).
+  - `POST /dsh-key-limits/import` — дешифрование и импорт бэкапа с дедупликацией по идентификатору.
+  - `GET /dsh-key-limits/update` — статус наличия новых версий в npm registry.
+  - `POST /dsh-key-limits/update` — запуск безопасного локального обновления.
 - **CLI:** Отсутствует. Управление только через UI и штатный `dsh plugin --profile web add/remove`.
 - **Документация:**
   - `README.md` (English, канонический).
@@ -90,7 +94,7 @@
   - Защищать динамические стили атрибутом `data-dsh-plugin="dsh-key-limits"`.
   - Сохранять секреты только через сервис DSH credentials.
 - **Don't:**
-  - Не добавлять сбор статистики токенов, графики расходов, историю сессий и ledger.
+  - Не добавлять тяжелые внешние чарт-библиотеки, сбор статистики токенов, историю сессий и бухгалтерский ledger (легковесный 24ч rolling burn-rate и SVG-спарклайн в v0.2.8 допустимы и работают локально в памяти без внешних зависимостей).
   - Не хардкодить цвета или шрифты вне CSS-переменных.
   - Не использовать зашитый русский текст в кодовой базе плагина.
 
@@ -111,3 +115,4 @@
 - **2026-09-27:** Внедрение аналитического блока (v0.2.8): расчет здоровья пула `poolStats` (#71), скользящий расчет скорости выгорания квоты `calcBurnRate` и времени до исчерпания на 24ч горизонте (#72), обратный отсчет до сброса `findNearestReset` в тултипе чипа и бейджах (#73), компактный SVG-спарклайн `UsageSparkline` без тяжелых чарт-библиотек с нулевым хардкодом цветов (#74).
 - **2026-09-27:** Расширение провайдеров и эргономики UI (v0.2.9): нативный фетчер SiliconFlow (#75), фетчеры Anthropic, Groq и Gemini с выносом в `lib/provider-extra-fetchers.js` для соблюдения стандарта 600 строк (#76), режим привязки чипа к углу экрана Docked Mode (#77), глобальный хоткей `Alt+K` для вызова хаба лимитов (#78), всплывающий баннер Danger Toast при падении квоты активного ключа ниже 15% (#79).
 - **2026-09-27:** Зашифрованный бэкап и пакетное обновление (v0.2.10): безопасный экспорт и импорт конфигураций подписок с шифрованием AES-256-GCM и деривацией ключа Scrypt в `lib/crypto-backup.js` (#80), кнопка принудительного пакетного обновления Refresh All в AllLimitsModal с пулом параллелизма и сбросом кэша (#81).
+- **2026-10-05:** Документация и гигиена тестов (v0.2.17): синхронизация схемы `Config` (`refreshHours`, `ui.*`), слотов (`plugins.row.config` + fallback `plugins.item`), 9 REST-эндпоинтов, разграничение published npm vs dev source checkout (#120), offline guard и input fast-fail в unit test suite без сетевых запросов (#119), внутренние инструкции `AGENTS.md` и тестовая матрица `index.md` (#121).
