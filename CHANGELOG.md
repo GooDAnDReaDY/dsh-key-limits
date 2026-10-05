@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.2.21
+
+### Block 2: Configuration, Providers & Dynamic Scheduling (#92, #106, #112, #99)
+- **Settings Card Stale Subscription & Storage Order Saving (#92)**:
+  - Fixed stale closure in `src/client/07-settings.js` by tracking `subsList` via `useRef`, preventing subscription list wipeout during `scope.subscribe` snapshot notifications.
+  - Included `{ op: "set", path: ["ui", "order"], value: s.order }` in `save()` mutation ops to ensure custom display ordering persists properly via `scope.mutate`.
+  - Marked `storageDir` field as `readOnly={true}` with an explanatory label `(read-only, configured in settings.yaml, requires restart)`, avoiding deceptive "Saved" notices for runtime immutable paths.
+- **Volatile Schema Definition & Import Error Propagation (#106)**:
+  - Marked `order: z.array(z.string()).volatile().default([])` in Schemastery `Config` schema, ensuring `SettingsForms.write` and `settings.update()` permit live order mutations.
+  - Handled `settingsSvc.update()` failure in `/import` route gracefully by propagating structured warning headers (`warning` and `warnings: [{ id: "ui_config", warning: "settings_update_failed" }]`) without silently mutating in-memory configuration.
+- **Dynamic Periodic Refresh Rescheduling (#112)**:
+  - Exported `rescheduleRefresh()` from `subManager` to dynamically re-evaluate `refreshHours` whenever `settings/document-updated`, `loader/volatile-update`, or `config` lifecycle events fire.
+  - Cleared existing timers immediately upon configuration changes and rescheduled next quota check according to updated interval.
+- **Accurate Gemini Quota Reporting (#99)**:
+  - Eliminated synthetic `100%` quota window fabrication in `fetchGeminiQuota` when reading active model counts from `/v1beta/models`.
+  - Returned `windows: []` to represent API connectivity and plan status without polluting aggregate quota calculations, pool stats, or alert toasts.
+
 ## 0.2.20
 
 ### Block 1: Core Security, Session Binding & Backup Reliability (#103, #131, #97, #107, #142)
