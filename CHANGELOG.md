@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.2.13
+
+### DSH Supported Contracts & Session Disambiguation
+- **Schemastery Volatile Settings & ConfigForm Contract (#92)**:
+  - Marked live-editable settings fields (`refreshHours`, `ui.floatChip`, `ui.composerBar`, `ui.activeOnTop`) as `.volatile()` in Schemastery schema, allowing seamless mutation through DSH `configForms`.
+  - Added Schemastery `.volatile()` polyfill and unboxed values via `plainConfig(value)`.
+  - Replaced non-existent `scope.get()` calls in client `ConfigFields` with canonical `scope.getSnapshot()`, `scope.subscribe()`, and `scope.mutate(ops)`.
+- **Settings Service Contract & Volatile Updates (#93)**:
+  - Removed dead `settings.register` API call.
+  - Implemented `describeRow()` and `syncSettingsSnapshot()`, dynamically synchronizing configuration on `settings/document-updated` and `loader/volatile-update` events.
+  - Connected `setExtraLogger` for provider diagnostics.
+- **Canonical DSH 0.2 Session Events & Hydration (#102)**:
+  - Added support for canonical DSH 0.2.0-rc.1 session events: `request/header` (`event.data.header.config`) and `request/context` (`event.data.provider/model`).
+  - Added startup hydration `seedExistingSessions()` from `ctx.sessions.list()` so existing active chats show correct quota cards immediately upon plugin load.
+  - Auto-invalidated cached session subscription bindings when provider switches.
+- **Ambient Credential Matching & Ambiguous Multi-Match (#103)**:
+  - Rewrote session credential binding to resolve ambient provider credentials dynamically (`DEEPSEEK_API_KEY`, etc.) and disambiguate multi-account setups via rule `AS-M4`.
+  - When multiple accounts exist for a provider without matching ambient credentials, returns degraded state (`subId: null, rule: 'AS-M1-multi', degraded: true, error: 'ambiguous'`) instead of blindly guessing the first account (`hits[0]`).
+  - In `matchSub`, handled credential fingerprint collisions with degraded rule `AS-M4-multi`.
+- **LocaleFace Contract & Provider Hints Localization (#109)**:
+  - Upgraded client to `LocaleFace` specification using `ctx.locale.getSnapshot().active` and `ctx.locale.subscribe(...)`.
+  - Bound plugin translations with `ctx.locale.bind('dsh-key-limits')`.
+  - Localized all 14 provider labels and hints in English and Chinese dictionaries.
+  - Localized modal eyebrow texts (`activeSessionEyebrow`, `hubEyebrow`), removing hardcoded English strings.
+
 ## 0.2.12
 
 ### Security & Storage Integrity Hardening
