@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.2.14
+
+### Provider Quotas & Schema Field Pipeline Fixes
+- **Provider Quota & Balance Normalization (#99)**:
+  - Extracted nested provider balances (SiliconFlow) and quota windows (Groq, Anthropic, Gemini) in `refreshSubscriptionEntry`.
+  - Mapped rate limit windows directly to `primaryWindow`, `secondaryWindow`, and `tertiaryWindow`.
+  - Preserved `cnyRemaining` and `cnyLimit` fields in `refreshSubscriptionEntry`, `saveSubCards`, and `loadSubs`, ensuring CNY balances for SiliconFlow and DeepSeek persist to disk and display in the UI.
+- **Dynamic Field Schemas in AddKeyModal (#100)**:
+  - Replaced hardcoded secret field and missing `schema.extra` check in `AddKeyModal` with dynamic iteration over `schema.fields`.
+  - Rendered provider-specific required fields with custom labels and placeholders (e.g. Workspace ID for OpenCode GO, Session Cookie for Ollama, sec_token for Qwen).
+  - Enforced `required: true` validation on all fields before submission.
+- **OpenCode GO Cookie Header Normalization (#101)**:
+  - Fixed duplicate `auth=auth_session=...` cookie header wrapping in `fetchOpenCodeGoQuota`.
+  - Updated `normalizeOpenCodeAuthCookie` to recognize existing `auth_session=` and `auth=` prefixes.
+- **ISO Rate Limit Reset Timestamp Parsing (#108)**:
+  - Fixed `parseRateLimitResetSeconds` prematurely parsing ISO timestamp strings (e.g. `'2030-01-01T00:00:00.000Z'`) via `parseFloat`, which erroneously extracted the year number as +2030 seconds.
+  - Prioritized `Date.parse(s)` for non-pure-numeric timestamp inputs to return true epoch milliseconds.
+
 ## 0.2.13
 
 ### DSH Supported Contracts & Session Disambiguation
