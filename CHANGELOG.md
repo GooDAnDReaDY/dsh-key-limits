@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.19
+
+### Modular Architecture & Core File Decomposition (#51)
+- **Decomposition of `lib/index.js` (< 250 Lines)**:
+  - Decomposed the monolithic `lib/index.js` (previously 919 lines) into dedicated, single-responsibility modules:
+    - `lib/session-tracker.js`: In-memory session tracking, LRU session bounding (`MAX_LIVE_SESSIONS = 500`), canonical session event listeners (`request/header`, `request/context`, `session/update`, `session/create`), startup session hydration, and active subscription matching logic (`resolveSessionSubBinding`, `buildActiveSub`).
+    - `lib/sub-manager.js`: Subscription lifecycle management, in-memory card caching, credentials storage orchestration (`upsertSubFromBody`), automatic background periodic quota refresh with configurable interval, and subscription list presentation with sorting (`buildSubsList`).
+    - `lib/routes.js`: HTTP REST API route registration (`/health`, `/config`, `/active-sub`, `/subs`, `/refresh-all`, `/export`, `/import`) with strict CSRF security checks (`isTrustedSettingsRequest`), input validation, and backup payload encryption/decryption handling.
+  - Reduced `lib/index.js` to a concise 140-line facade that wires configuration, hooks lifecycle services, and delegates to the specialized modules.
+- **Backward Compatibility & Integration Parity**:
+  - Re-exported `extractRouteFromEvent` from both `lib/index.js` and `lib/session-tracker.js`.
+  - Maintained full interface parity across all REST endpoints, configuration schemas, and Cordis lifecycle hooks with zero regressions (137/137 unit tests passing).
+- **Regression Test Coverage**:
+  - Added `test/modular-architecture.test.mjs` verifying line-count thresholds, module export contracts, and end-to-end route registration.
+
 ## 0.2.18
 
 ### Security Hardening, Cryptographic Matching & Session Bounding
