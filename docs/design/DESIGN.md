@@ -4,7 +4,7 @@
 - **Назначение:** Отображение квот, оставшихся лимитов и балансов API-ключей/подписок провайдеров в DeepSeek Harness (DSH). Предотвращает внезапное исчерпание лимитов при диалогах с AI.
 - **Канонический путь репозитория:** `/mnt/external/Project/DEV/dhsplugins/dsh-key-limits` (согласно `dhs-plugin-release-workflow`).
 - **Аудитория:** Разработчики и пользователи DSH, использующие несколько провайдеров (OpenCode GO, Ollama Cloud, Qwen Cloud, Kimi for Coding, GLM, MiniMax, Cline, DeepSeek, Command Code, OpenRouter, SiliconFlow, Anthropic, Groq, Google Gemini).
-- **Статус:** Production-ready. Версия 0.2.18.
+- **Статус:** Production-ready. Версия 0.2.19.
 
 ---
 
@@ -116,4 +116,5 @@
 - **2026-09-27:** Расширение провайдеров и эргономики UI (v0.2.9): нативный фетчер SiliconFlow (#75), фетчеры Anthropic, Groq и Gemini с выносом в `lib/provider-extra-fetchers.js` для соблюдения стандарта 600 строк (#76), режим привязки чипа к углу экрана Docked Mode (#77), глобальный хоткей `Alt+K` для вызова хаба лимитов (#78), всплывающий баннер Danger Toast при падении квоты активного ключа ниже 15% (#79).
 - **2026-09-27:** Зашифрованный бэкап и пакетное обновление (v0.2.10): безопасный экспорт и импорт конфигураций подписок с шифрованием AES-256-GCM и деривацией ключа Scrypt в `lib/crypto-backup.js` (#80), кнопка принудительного пакетного обновления Refresh All в AllLimitsModal с пулом параллелизма и сбросом кэша (#81).
 - **2026-10-05:** Документация и гигиена тестов (v0.2.17): синхронизация схемы `Config` (`refreshHours`, `ui.*`), слотов (`plugins.row.config` + fallback `plugins.item`), 9 REST-эндпоинтов, разграничение published npm vs dev source checkout (#120), offline guard и input fast-fail в unit test suite без сетевых запросов (#119), внутренние инструкции `AGENTS.md` и тестовая матрица `index.md` (#121).
+- **2026-10-05:** Модульная декомпозиция ядра (v0.2.19): вынос отслеживания сессий в `lib/session-tracker.js`, управления подписками в `lib/sub-manager.js`, и маршрутов REST API в `lib/routes.js` с уменьшением `lib/index.js` до 140 строк (#51).
 - **2026-10-05:** Безопасность и архитектурное укрепление (v0.2.18): безопасное разрешение логгера (#128), ограничение размера `live` сессий лимитом `MAX_LIVE_SESSIONS = 500` (#130), защита от обхода CSRF заголовком `x-dsh-internal-auth` (#131), передача API-ключа Gemini через заголовок `x-goog-api-key` (#132), переход `credentialFingerprint` на криптографический SHA-256 (#125).
