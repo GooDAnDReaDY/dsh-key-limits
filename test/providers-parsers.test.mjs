@@ -206,10 +206,79 @@ test('fetchClineQuota parses rolling windows', async () => {
 
 test('fetchOllamaQuota requires both apiKey and sessionCookie', async () => {
   clearSubCache()
-  const res1 = await fetchOllamaQuota('', 'cookie')
-  assert.equal(res1.status, 'error')
-  const res2 = await fetchOllamaQuota('key', '')
-  assert.equal(res2.status, 'error')
+  const originalFetch = globalThis.fetch
+  try {
+    globalThis.fetch = async () => {
+      throw new Error('network call forbidden in unit test: fetchOllamaQuota must fast-fail on missing input')
+    }
+    const res1 = await fetchOllamaQuota('', 'cookie')
+    assert.equal(res1.status, 'error')
+    assert.ok(res1.message.includes('api key not configured'))
+    const res2 = await fetchOllamaQuota('key', '')
+    assert.equal(res2.status, 'error')
+    assert.ok(res2.message.includes('session cookie not configured'))
+    const res3 = await fetchOllamaQuota('', '')
+    assert.equal(res3.status, 'error')
+    assert.ok(res3.message.includes('api key not configured'))
+    assert.ok(res3.message.includes('session cookie not configured'))
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+})
+
+test('fetchOllamaQuota parses metadata and usage when both are valid', async () => {
+  clearSubCache()
+  const originalFetch = globalThis.fetch
+  try {
+    const requestedUrls = []
+    globalThis.fetch = async (url, opts) => {
+      const u = String(url)
+      requestedUrls.push(u)
+      if (u.includes('/api/me')) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            Plan: 'pro',
+            SubscriptionPeriodEnd: '2026-10-31T00:00:00Z',
+          }),
+        }
+      }
+      if (u.includes('/settings')) {
+        return {
+          ok: true,
+          status: 200,
+          text: async () => 'session usage 25.0% used weekly usage 50.0% used monthly usage 75.0% used',
+        }
+      }
+      throw new Error('Unexpected URL: ' + u)
+    }
+    const res = await fetchOllamaQuota('valid-key', '__Secure-session=xyz')
+    assert.equal(res.status, 'ok')
+    assert.equal(res.plan, 'pro')
+    assert.ok(requestedUrls.some((u) => u.includes('/api/me')))
+    assert.ok(requestedUrls.some((u) => u.includes('/settings')))
+    assert.equal(res.primaryWindow.usedPercent, 25)
+    assert.equal(res.secondaryWindow.usedPercent, 50)
+    assert.equal(res.tertiaryWindow.usedPercent, 75)
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+})
+
+test('fetchQwenQuota validates cookie presence and stubs transport', async () => {
+  clearSubCache()
+  const originalFetch = globalThis.fetch
+  try {
+    globalThis.fetch = async () => {
+      throw new Error('network call forbidden in unit test: fetchQwenQuota must fast-fail on missing input')
+    }
+    const resEmpty = await fetchQwenQuota('')
+    assert.equal(resEmpty.status, 'error')
+    assert.ok(resEmpty.message.includes('Qwen cookie not configured'))
+  } finally {
+    globalThis.fetch = originalFetch
+  }
 })
 
 test('fetchOpenCodeGoQuota parses HTML hydration metrics', async () => {

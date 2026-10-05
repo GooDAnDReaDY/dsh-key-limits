@@ -186,9 +186,12 @@ dsh web --profile web
 plugins:
   '@goodandready/dsh-key-limits':
     storageDir: ~/.dsh/storages/dsh-key-limits
-    refreshIntervalMs: 60000
-    activeOnTop: true
-    order: []
+    refreshHours: 24
+    ui:
+      floatChip: true
+      composerBar: true
+      activeOnTop: true
+      order: []
 ```
 
 ### Parameter Details
@@ -196,19 +199,40 @@ plugins:
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `storageDir` | `string` | `~/.dsh/storages/dsh-key-limits` | Directory where subscription metadata and cached cards are stored. |
-| `refreshIntervalMs` | `number` | `60000` (1 min) | Polling frequency for refreshing quota windows from providers. |
-| `activeOnTop` | `boolean` | `true` | Automatically pins the account matching the active chat session to the top of lists. |
-| `order` | `string[]` | `[]` | User-defined sequence of subscription IDs for custom card ordering. |
+| `refreshHours` | `number` | `24` | Background polling interval in hours for refreshing quota windows from providers. |
+| `ui.floatChip` | `boolean` | `true` | Show floating draggable indicator chip in the viewport. |
+| `ui.composerBar` | `boolean` | `true` | Show active key button in the chat composer bar. |
+| `ui.activeOnTop` | `boolean` | `true` | Automatically pin the account matching the active chat session to the top of lists. |
+| `ui.order` | `string[]` | `[]` | User-defined sequence of subscription IDs for custom card ordering. |
+
+---
+
+## 🌐 REST API Endpoints
+
+| Method & Path | Access / Origin | Description |
+|---------------|-----------------|-------------|
+| `GET /dsh-key-limits/health` | Public / Web | Service health check and subscription summary |
+| `GET /dsh-key-limits/config` | Public / Web | Public UI configuration and provider input schemas |
+| `GET /dsh-key-limits/active-sub` | Public / Web | Active session subscription binding (`?session=<id>`) |
+| `GET /dsh-key-limits/subs` | Public / Web | List of all configured subscriptions, cards, and balances |
+| `POST /dsh-key-limits/subs` | Loopback / Same-Origin | Add, edit, or delete a subscription |
+| `POST /dsh-key-limits/refresh-all` | Loopback / Same-Origin | Force refresh all subscriptions (10s cooldown guard) |
+| `POST /dsh-key-limits/export` | Loopback / Same-Origin | Export subscriptions encrypted with passphrase (AES-256-GCM) |
+| `POST /dsh-key-limits/import` | Loopback / Same-Origin | Decrypt and import subscription backup with deduplication |
+| `GET /dsh-key-limits/update` | Loopback / Same-Origin | Check npm registry for newer plugin versions |
+| `POST /dsh-key-limits/update` | Loopback / Same-Origin | Apply plugin update via internal npm runner |
 
 ---
 
 ## 🛠️ Development & Testing
 
+> **Note**: The published npm package and release tarball carry only runtime production files (`lib/`, `cordis.patch.yml`, docs, and license). Development sources (`src/client/`, `test/`, and build scripts) are maintained in the source repository. To run automated tests or rebuild the client bundle, clone the development repository.
+
 ```bash
-# Build unified client bundle from src/client/
+# Build unified client bundle from src/client/ into lib/client.js
 npm run build:client
 
-# Run automated tests
+# Run automated offline test suite
 npm test
 ```
 
@@ -217,23 +241,26 @@ npm test
 ```
 .
 ├── lib/
-│   ├── index.js          # Cordis plugin entrypoint & HTTP routes
-│   ├── client.js         # Built client bundle
-│   ├── cards.js          # Card generation and formatting
-│   ├── subs.js           # Provider quota fetchers & normalization
-│   ├── paths.js          # Path resolution helpers
-│   └── plugin-updater.js # Secure loopback updater
-├── src/client/           # Source modules for browser client
-│   ├── 01-prelude.js     # Scoped CSS & React setup
-│   ├── 02-locale.js      # Multi-language dictionaries (en, zh, ru)
-│   ├── 03-format.js      # Humanized countdowns & color classes
-│   ├── 04-modals.js      # AllLimitsModal & OneLimitModal
-│   ├── 05-bar.js         # Composer bar ActiveKeyButton
-│   ├── 06-float.js       # Draggable FloatChip
-│   ├── 07-settings.js    # Settings card, reorder list & updater
-│   └── 08-apply.js       # DSH plugin bootstrap & slot registrations
-├── cordis.patch.yml      # Cordis plugin declaration
-└── test/                 # Test suite
+│   ├── index.js                  # Cordis plugin entrypoint & HTTP routes
+│   ├── client.js                 # Built client bundle
+│   ├── cards.js                  # Card generation and formatting
+│   ├── subs.js                   # Provider quota manager & normalization
+│   ├── provider-fetchers.js       # Core quota fetchers & HTML parsers
+│   ├── provider-extra-fetchers.js # Extended quota fetchers (SiliconFlow, Anthropic, Groq, Gemini)
+│   ├── crypto-backup.js          # AES-256-GCM passphrase export & import
+│   ├── paths.js                  # Path resolution helpers
+│   └── plugin-updater.js         # Secure loopback updater
+├── src/client/                   # Source modules for browser client
+│   ├── 01-prelude.js             # Scoped CSS & React setup
+│   ├── 02-locale.js              # Multi-language dictionaries (en, zh; ru via dsh-russian-lang)
+│   ├── 03-format.js              # Humanized countdowns & color classes
+│   ├── 04-modals.js              # AllLimitsModal & OneLimitModal
+│   ├── 05-bar.js                 # Composer bar ActiveKeyButton
+│   ├── 06-float.js               # Draggable FloatChip
+│   ├── 07-settings.js            # Settings card, reorder list & updater
+│   └── 08-apply.js               # DSH plugin bootstrap & slot registrations
+├── cordis.patch.yml              # Cordis plugin declaration
+└── test/                         # Test suite
 ```
 
 ---

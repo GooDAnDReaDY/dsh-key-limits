@@ -188,9 +188,12 @@ dsh web --profile web
 plugins:
   '@goodandready/dsh-key-limits':
     storageDir: ~/.dsh/storages/dsh-key-limits
-    refreshIntervalMs: 60000
-    activeOnTop: true
-    order: []
+    refreshHours: 24
+    ui:
+      floatChip: true
+      composerBar: true
+      activeOnTop: true
+      order: []
 ```
 
 ### 参数说明
@@ -198,19 +201,40 @@ plugins:
 | 配置字段 | 类型 | 默认值 | 详细说明 |
 |---------|------|-------|---------|
 | `storageDir` | `string` | `~/.dsh/storages/dsh-key-limits` | 存放订阅配置与卡片缓存文件 `subs.json` 的目录路径。 |
-| `refreshIntervalMs` | `number` | `60000` (1 分钟) | 后台静默轮询第三方服务商配额的间隔时间（毫秒）。 |
-| `activeOnTop` | `boolean` | `true` | 是否自动将当前会话关联的模型账户固定至卡片列表顶部。 |
-| `order` | `string[]` | `[]` | 用户手动指定的订阅卡片顺序 ID 列表。 |
+| `refreshHours` | `number` | `24` | 后台静默轮询第三方服务商配额的间隔时间（小时）。 |
+| `ui.floatChip` | `boolean` | `true` | 是否在界面显示浮动配额徽章。 |
+| `ui.composerBar` | `boolean` | `true` | 是否在输入栏（composer bar）显示活动密钥指示器。 |
+| `ui.activeOnTop` | `boolean` | `true` | 是否自动将与当前会话绑定的账户排在卡片列表最顶部。 |
+| `ui.order` | `string[]` | `[]` | 用户自定义排序的订阅 ID 列表。 |
+
+---
+
+## 🌐 REST API 端点
+
+| 方法与路径 | 访问权限 / 来源 | 说明 |
+|------------|-----------------|------|
+| `GET /dsh-key-limits/health` | 公开 / Web | 插件健康检查与订阅摘要 |
+| `GET /dsh-key-limits/config` | 公开 / Web | 公开 UI 配置与服务商字段架构 |
+| `GET /dsh-key-limits/active-sub` | 公开 / Web | 获取当前会话绑定的订阅信息 (`?session=<id>`) |
+| `GET /dsh-key-limits/subs` | 公开 / Web | 获取所有已配置订阅、卡片与余额 |
+| `POST /dsh-key-limits/subs` | 回环 / 同源 | 新增、修改或删除订阅 |
+| `POST /dsh-key-limits/refresh-all` | 回环 / 同源 | 强制刷新全部订阅配额（10秒冷却） |
+| `POST /dsh-key-limits/export` | 回环 / 同源 | 导出经口令加密的订阅备份（AES-256-GCM） |
+| `POST /dsh-key-limits/import` | 回环 / 同源 | 解密并导入订阅备份（支持自动去重） |
+| `GET /dsh-key-limits/update` | 回环 / 同源 | 检查 npm 官方源中是否有新版本 |
+| `POST /dsh-key-limits/update` | 回环 / 同源 | 触发内置更新器执行自动升级 |
 
 ---
 
 ## 🛠️ 开发与测试构建
 
+> **提示**：已发布的 npm 包和发布 tarball 仅包含生产运行时必需的文件（`lib/`、`cordis.patch.yml`、文档及许可证）。开发源码（`src/client/`、`test/` 及构建脚本）保留在源码仓库中。如需执行自动化测试或重新构建客户端代码，请克隆开发源码仓库。
+
 ```bash
-# 从 src/client/ 构建打包一体化客户端脚本
+# 从 src/client/ 打包编译出完整的单文件客户端 bundle 到 lib/client.js
 npm run build:client
 
-# 运行自动化测试套件
+# 运行自动化离线单元测试
 npm test
 ```
 
@@ -219,23 +243,26 @@ npm test
 ```
 .
 ├── lib/
-│   ├── index.js          # Cordis 插件入口与服务端路由
-│   ├── client.js         # 打包生成的客户端脚本
-│   ├── cards.js          # 配额卡片组装与格式化
-│   ├── subs.js           # 服务商数据抓取与标准归一化
-│   ├── paths.js          # 路径处理辅助函数
-│   └── plugin-updater.js # 安全本地更新器
-├── src/client/           # 浏览器端源码模块
-│   ├── 01-prelude.js     # 样式隔离定义与 React 绑定
-│   ├── 02-locale.js      # 多语言支持字典 (en, zh, ru)
-│   ├── 03-format.js      # 时间格式化、百分比与颜色映射
-│   ├── 04-modals.js      # 全局弹窗与单项卡片弹窗
-│   ├── 05-bar.js         # 输入框实时按钮 ActiveKeyButton
-│   ├── 06-float.js       # 悬浮监控胶囊 FloatChip
-│   ├── 07-settings.js    # 设置面板、排序组件与升级器
-│   └── 08-apply.js       # 插件客户端启动与插槽装配
-├── cordis.patch.yml      # Cordis 扩展补丁配置
-└── test/                 # 自动化测试脚本
+│   ├── index.js                  # Cordis 插件入口与服务端路由
+│   ├── client.js                 # 打包生成的客户端脚本
+│   ├── cards.js                  # 配额卡片组装与格式化
+│   ├── subs.js                   # 订阅管理器与数据标准化
+│   ├── provider-fetchers.js       # 核心服务商配额抓取器与 HTML 解析器
+│   ├── provider-extra-fetchers.js # 扩展服务商抓取器 (SiliconFlow, Anthropic, Groq, Gemini)
+│   ├── crypto-backup.js          # AES-256-GCM 密码学加密备份与恢复
+│   ├── paths.js                  # 路径处理辅助函数
+│   └── plugin-updater.js         # 安全本地更新器
+├── src/client/                   # 浏览器端源码模块
+│   ├── 01-prelude.js             # 样式隔离定义与 React 绑定
+│   ├── 02-locale.js              # 多语言字典 (en, zh; ru 通过 dsh-russian-lang)
+│   ├── 03-format.js              # 时间格式化、百分比与颜色映射
+│   ├── 04-modals.js              # 全局弹窗与单项卡片弹窗
+│   ├── 05-bar.js                 # 输入框实时按钮 ActiveKeyButton
+│   ├── 06-float.js               # 悬浮监控胶囊 FloatChip
+│   ├── 07-settings.js            # 设置面板、排序组件与升级器
+│   └── 08-apply.js               # 插件客户端启动与插槽装配
+├── cordis.patch.yml              # Cordis 扩展补丁配置
+└── test/                         # 自动化测试脚本
 ```
 
 ---
