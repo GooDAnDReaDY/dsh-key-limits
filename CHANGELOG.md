@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.2.20
+
+### Block 1: Core Security, Session Binding & Backup Reliability (#103, #131, #97, #107, #142)
+- **Strict Origin Validation with Internal Auth (#131)**:
+  - Enforced strict Origin-to-Host matching in `isTrustedSettingsRequest` before evaluating internal authorization headers (`x-dsh-internal-auth`), ensuring mismatched origins cannot bypass CSRF validation.
+- **Authoritative Ambient Binding & No-Match Fallback Elimination (#103)**:
+  - Preserved authoritative negative binding results (`rule: 'no-match'`) in `buildActiveSub` when an ambient credential does not match stored subscriptions, preventing improper fallback to arbitrary accounts (`AS-M1`).
+  - Added metadata fingerprint comparison in `resolveSessionSubBinding` to maintain accurate binding detection across credential rotations.
+- **Itemized Warnings on Export with Unresolved Credentials (#97)**:
+  - Enhanced `/export` endpoint to detect unresolved credentials and return an itemized `warnings` array alongside structured warning messages, preventing silent incomplete backups.
+- **Symmetric 8 MiB Export/Import Capacity (#107)**:
+  - Expanded `MAX_BACKUP_BODY_BYTES` to 8 MiB symmetrically across export and import endpoints.
+  - Added pre-export size verification against the import limit and confirmed reliable export/import of 150+ large cookie subscriptions (~7KB cookies, 2.16MB+ payload envelopes) without 413 rejections or truncation.
+- **Preflight Exception Handling Cleanliness (#142)**:
+  - Cleared all empty catch blocks across `lib/session-tracker.js`, `src/client/01-prelude.js`, `src/client/02-locale.js`, `src/client/03-format.js`, `src/client/07-settings.js`, and `src/client/08-apply.js`, achieving clean preflight verification (`FAIL=0`).
+
+
 ## 0.2.19
 
 ### Modular Architecture & Core File Decomposition (#51)
