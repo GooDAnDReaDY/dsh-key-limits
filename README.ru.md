@@ -187,9 +187,12 @@ dsh web --profile web
 plugins:
   '@goodandready/dsh-key-limits':
     storageDir: ~/.dsh/storages/dsh-key-limits
-    refreshIntervalMs: 60000
-    activeOnTop: true
-    order: []
+    refreshHours: 24
+    ui:
+      floatChip: true
+      composerBar: true
+      activeOnTop: true
+      order: []
 ```
 
 ### Таблица параметров
@@ -197,19 +200,40 @@ plugins:
 | Параметр | Тип | По умолчанию | Описание |
 |----------|-----|--------------|----------|
 | `storageDir` | `string` | `~/.dsh/storages/dsh-key-limits` | Каталог хранения файла метаданных подписок `subs.json`. |
-| `refreshIntervalMs` | `number` | `60000` (1 мин) | Интервал фонового опроса провайдеров в миллисекундах. |
-| `activeOnTop` | `boolean` | `true` | Закреплять ли аккаунт активной сессии на самом верху списка. |
-| `order` | `string[]` | `[]` | Пользовательский порядок идентификаторов подписок. |
+| `refreshHours` | `number` | `24` | Интервал фонового опроса провайдеров в часах. |
+| `ui.floatChip` | `boolean` | `true` | Показывать плавающий перетаскиваемый чип-индикатор в интерфейсе. |
+| `ui.composerBar` | `boolean` | `true` | Показывать кнопку активного ключа в строке ввода сообщений (composer bar). |
+| `ui.activeOnTop` | `boolean` | `true` | Автоматически закреплять активный в диалоге аккаунт на самом верху списка. |
+| `ui.order` | `string[]` | `[]` | Пользовательский порядок отображения карточек (массив ID подписок). |
+
+---
+
+## 🌐 Маршруты REST API
+
+| Метод и путь | Доступ / Источник | Описание |
+|--------------|-------------------|----------|
+| `GET /dsh-key-limits/health` | Public / Web | Проверка работоспособности и сводка подписок |
+| `GET /dsh-key-limits/config` | Public / Web | Публичная конфигурация UI и схемы параметров провайдеров |
+| `GET /dsh-key-limits/active-sub` | Public / Web | Привязка подписки к активной сессии (`?session=<id>`) |
+| `GET /dsh-key-limits/subs` | Public / Web | Список всех настроенных подписок, карточек и балансов |
+| `POST /dsh-key-limits/subs` | Loopback / Same-Origin | Добавление, изменение или удаление подписки |
+| `POST /dsh-key-limits/refresh-all` | Loopback / Same-Origin | Принудительное обновление всех подписок (cooldown 10с) |
+| `POST /dsh-key-limits/export` | Loopback / Same-Origin | Экспорт зашифрованного паролем бэкапа подписок (AES-256-GCM) |
+| `POST /dsh-key-limits/import` | Loopback / Same-Origin | Дешифрование и импорт бэкапа с дедупликацией |
+| `GET /dsh-key-limits/update` | Loopback / Same-Origin | Проверка наличия новых версий плагина в npm |
+| `POST /dsh-key-limits/update` | Loopback / Same-Origin | Запуск автоматического обновления через npm |
 
 ---
 
 ## 🛠️ Разработка и тестирование
 
+> **Примечание**: Опубликованный npm-пакет и релизный архив содержат только файлы рантайма (`lib/`, `cordis.patch.yml`, документацию и лицензию). Исходный код (`src/client/`, `test/` и скрипты сборки) находится в репозитории разработки. Для запуска тестов или пересборки клиентского бандла клонируйте репозиторий разработки.
+
 ```bash
-# Сборка клиентского бандла lib/client.js
+# Сборка монолитного клиентского бандла из src/client/ в lib/client.js
 npm run build:client
 
-# Запуск полного набора тестов
+# Запуск офлайн-тестов
 npm test
 ```
 
@@ -218,23 +242,26 @@ npm test
 ```
 .
 ├── lib/
-│   ├── index.js          # Точка входа Cordis и маршруты HTTP
-│   ├── client.js         # Собранный клиентский бандл
-│   ├── cards.js          # Генерация карточек квот
-│   ├── subs.js           # Опрос API провайдеров и расчёт окон
-│   ├── paths.js          # Утилиты путей
-│   └── plugin-updater.js # Безопасный One-Click Updater
-├── src/client/           # Исходники модулей браузерного клиента
-│   ├── 01-prelude.js     # Стили и привязки React
-│   ├── 02-locale.js      # Словари локализации (en, zh, ru)
-│   ├── 03-format.js      # Форматирование дат, процентов и цветов
-│   ├── 04-modals.js      # Модальные окна AllLimitsModal и OneLimitModal
-│   ├── 05-bar.js         # Кнопка панели ввода ActiveKeyButton
-│   ├── 06-float.js       # Плавающий бейдж FloatChip
-│   ├── 07-settings.js    # Карточка настроек, сортировка и апдейтер
-│   └── 08-apply.js       # Инициализация плагина и регистрация слотов
-├── cordis.patch.yml      # Манифест расширения Cordis
-└── test/                 # Модульные тесты
+│   ├── index.js                  # Точка входа Cordis-плагина и маршруты HTTP
+│   ├── client.js                 # Скомпилированный клиентский бандл
+│   ├── cards.js                  # Рендеринг и форматирование карточек
+│   ├── subs.js                   # Менеджер подписок и нормализация
+│   ├── provider-fetchers.js       # Основные фетчеры и парсеры HTML
+│   ├── provider-extra-fetchers.js # Расширенные фетчеры (SiliconFlow, Anthropic, Groq, Gemini)
+│   ├── crypto-backup.js          # Экспорт и импорт бэкапа AES-256-GCM
+│   ├── paths.js                  # Резолвер путей хранения
+│   └── plugin-updater.js         # Безопасный апдейтер
+├── src/client/                   # Исходные модули браузерного интерфейса
+│   ├── 01-prelude.js             # Изолированный CSS и инициализация React
+│   ├── 02-locale.js              # Словари локализации (en, zh; ru через dsh-russian-lang)
+│   ├── 03-format.js              # Форматирование времени и цветовые шкалы
+│   ├── 04-modals.js              # AllLimitsModal и OneLimitModal
+│   ├── 05-bar.js                 # Кнопка ActiveKeyButton в строке ввода
+│   ├── 06-float.js               # Draggable FloatChip
+│   ├── 07-settings.js            # Карточка настроек, сортировка и апдейтер
+│   └── 08-apply.js               # Инициализация плагина и регистрация слотов DSH
+├── cordis.patch.yml              # Манифест плагина для Cordis
+└── test/                         # Набор тестов
 ```
 
 ---
