@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.2.15
+
+### Backup & Transport Integrity
+- **Lossless Backup Import & Identity Preservation (#106)**:
+  - Preserved original subscription IDs and restored display labels across export and import cycles.
+  - Normalized `label` and `alias` fields so imported accounts retain user-facing names.
+  - Encrypted and restored UI layout configuration (`ui.order`, `activeOnTop`, `floatChip`, `composerBar`).
+  - Added idempotent deduplication and collision policy in `upsertSubFromBody`: repeat backup imports update existing records in place instead of generating duplicate entries.
+- **Transport Capacity & Slicing Refusal (#107)**:
+  - Increased import body limit to `MAX_BACKUP_BODY_BYTES = 2MB` to comfortably accommodate multi-account backups with long session cookies (e.g. 51+ Ollama/OpenCode GO accounts expanding under hex ciphertext).
+  - Enforced symmetric `MAX_BACKUP_ENTRIES = 500` validation across export and import; import rejects overlimit payloads prior to any disk writes.
+  - Removed arbitrary `slice(0, 50)` truncation; all valid entries are imported with itemized results returned in response.
+- **HTTP 413 Socket Lifecycle (#122)**:
+  - Fixed premature socket teardown (`req.destroy()`) in `readJsonBody`, replacing it with stream draining via `req.resume()`.
+  - Configured `json()` helper to emit `Connection: close` on HTTP 413, preventing client `ECONNRESET` and ensuring structured JSON delivery over real HTTP sockets.
+
 ## 0.2.14
 
 ### Provider Quotas & Schema Field Pipeline Fixes
