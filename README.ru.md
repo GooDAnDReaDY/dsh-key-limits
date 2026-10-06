@@ -214,7 +214,7 @@ plugins:
 |--------------|-------------------|----------|
 | `GET /dsh-key-limits/health` | Public / Web | Проверка работоспособности и сводка подписок |
 | `GET /dsh-key-limits/config` | Public / Web | Публичная конфигурация UI и схемы параметров провайдеров |
-| `GET /dsh-key-limits/active-sub` | Public / Web | Привязка подписки к активной сессии (`?session=<id>`) |
+| `GET /dsh-key-limits/active-sub` | Public / Web | Привязка подписки к активной сессии (`?sessionId=<id>`) |
 | `GET /dsh-key-limits/subs` | Public / Web | Список всех настроенных подписок, карточек и балансов |
 | `POST /dsh-key-limits/subs` | Loopback / Same-Origin | Добавление, изменение или удаление подписки |
 | `POST /dsh-key-limits/refresh-all` | Loopback / Same-Origin | Принудительное обновление всех подписок (cooldown 10с) |

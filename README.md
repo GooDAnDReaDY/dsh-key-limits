@@ -198,7 +198,7 @@ plugins:
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `storageDir` | `string` | `~/.dsh/storages/dsh-key-limits` | Directory where subscription metadata and cached cards are stored. |
+| `storageDir` | `string` | `~/.dsh/storages/dsh-key-limits` | Directory where subscription metadata and cached cards are stored (read-only in UI, configured in settings.yaml, requires restart). |
 | `refreshHours` | `number` | `24` | Background polling interval in hours for refreshing quota windows from providers. |
 | `ui.floatChip` | `boolean` | `true` | Show floating draggable indicator chip in the viewport. |
 | `ui.composerBar` | `boolean` | `true` | Show active key button in the chat composer bar. |
@@ -213,10 +213,10 @@ plugins:
 |---------------|-----------------|-------------|
 | `GET /dsh-key-limits/health` | Public / Web | Service health check and subscription summary |
 | `GET /dsh-key-limits/config` | Public / Web | Public UI configuration and provider input schemas |
-| `GET /dsh-key-limits/active-sub` | Public / Web | Active session subscription binding (`?session=<id>`) |
+| `GET /dsh-key-limits/active-sub` | Public / Web | Active session subscription binding (`?sessionId=<id>`) |
 | `GET /dsh-key-limits/subs` | Public / Web | List of all configured subscriptions, cards, and balances |
 | `POST /dsh-key-limits/subs` | Loopback / Same-Origin | Add, edit, or delete a subscription |
-| `POST /dsh-key-limits/refresh-all` | Loopback / Same-Origin | Force refresh all subscriptions (10s cooldown guard) |
+| `POST /dsh-key-limits/refresh-all` | Loopback / Same-Origin | Force refresh all subscriptions (concurrent refresh lock) |
 | `POST /dsh-key-limits/export` | Loopback / Same-Origin | Export subscriptions encrypted with passphrase (AES-256-GCM) |
 | `POST /dsh-key-limits/import` | Loopback / Same-Origin | Decrypt and import subscription backup with deduplication |
 | `GET /dsh-key-limits/update` | Loopback / Same-Origin | Check npm registry for newer plugin versions |

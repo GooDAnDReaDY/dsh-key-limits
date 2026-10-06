@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.2.23
+
+### Block 4: Canonical Tokens, Peer Dependencies, Health Security & Offline Hygiene (#119, #120, #121, #146, #147, #148)
+- **Canonical Design System Status Tokens (#146)**:
+  - Replaced non-canonical tokens in `01-prelude.js`, `04-modals.js`, and `07-settings.js` with canonical DSH tokens: `--dsw-alias-state-error-primary`, `--dsw-alias-state-warn-primary`, `--dsw-alias-state-success-primary`.
+  - Verified 0 bare occurrences of `state-danger`, `state-warning`, and `state-success` remain in client bundle.
+- **Service Peer Dependencies Declaration (#147)**:
+  - Declared peerDependencies for host services in `package.json`: `@deepseek-ai/dsh-settings`, `@deepseek-ai/dsh-host-webserver`, `@deepseek-ai/dsh-session`, and `@deepseek-ai/dsh-credentials`.
+- **Health Route Origin Guard Enforcement (#148)**:
+  - Added `isTrustedSettingsRequest(req)` guard to `GET /dsh-key-limits/health` in `lib/routes.js`.
+  - Enforced consistent 403 Forbidden protection on all 7/7 HTTP endpoints against unauthorized cross-origin requests.
+- **Offline Network Guard and Unit Suite Isolation (#119)**:
+  - Added `test/offline-guard.mjs` and hooked into `npm test` to strictly fail-closed on any unmocked external network access.
+  - Mocked transport in `test/block7-security-hardening.test.mjs` test #124 to ensure 100% offline isolation.
+- **Documentation and Contract Alignment (#120)**:
+  - Reconciled `README.md`, `README.ru.md`, `README.zh.md`, and `docs/design/DESIGN.md` with active runtime contract.
+  - Updated `?sessionId=` parameter, clarified dynamic UI config vs restart-only `storageDir`, removed non-existent 10s cooldown promise.
+- **Gitea Worktree Hygiene & Three-Channel Separation (#121)**:
+  - Removed `AGENTS.md` and `index.md` from `.gitignore` and committed them to Git so clean worktrees retain project rules.
+  - Maintained complete exclusion from public layers via `.gitattributes: export-ignore` (GitHub) and `package.json: files` whitelist (npm).
+  - Updated `index.md` metrics and `test/hygiene.test.mjs`.
+
 ## 0.2.22
 
 ### Block 3: UI/UX, Accessibility, Focus Management & Localization (#109, #110, #111, #115, #117)

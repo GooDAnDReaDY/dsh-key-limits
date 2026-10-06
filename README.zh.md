@@ -215,10 +215,10 @@ plugins:
 |------------|-----------------|------|
 | `GET /dsh-key-limits/health` | 公开 / Web | 插件健康检查与订阅摘要 |
 | `GET /dsh-key-limits/config` | 公开 / Web | 公开 UI 配置与服务商字段架构 |
-| `GET /dsh-key-limits/active-sub` | 公开 / Web | 获取当前会话绑定的订阅信息 (`?session=<id>`) |
+| `GET /dsh-key-limits/active-sub` | 公开 / Web | 获取当前会话绑定的订阅信息 (`?sessionId=<id>`) |
 | `GET /dsh-key-limits/subs` | 公开 / Web | 获取所有已配置订阅、卡片与余额 |
 | `POST /dsh-key-limits/subs` | 回环 / 同源 | 新增、修改或删除订阅 |
-| `POST /dsh-key-limits/refresh-all` | 回环 / 同源 | 强制刷新全部订阅配额（10秒冷却） |
+| `POST /dsh-key-limits/refresh-all` | 回环 / 同源 | 强制刷新全部订阅配额（并发锁定） |
 | `POST /dsh-key-limits/export` | 回环 / 同源 | 导出经口令加密的订阅备份（AES-256-GCM） |
 | `POST /dsh-key-limits/import` | 回环 / 同源 | 解密并导入订阅备份（支持自动去重） |
 | `GET /dsh-key-limits/update` | 回环 / 同源 | 检查 npm 官方源中是否有新版本 |
