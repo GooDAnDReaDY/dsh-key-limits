@@ -1,5 +1,55 @@
 # Changelog
 
+## 0.2.24
+
+### Block 5: Audit Recheck Fixes (#97, #106, #107, #109, #115, #120, #121)
+- **Itemized Unresolved Credentials Warning on Export (#97)**:
+  - Extended export credential validation to verify `extraCredentialRef` alongside primary `credentialRef`.
+  - Emitted structured itemized warnings for any missing required credential fields (e.g. Ollama session cookies).
+  - Enhanced `BackupSection` in UI to display localized warning notices when an export contains unresolved entries.
+- **UI Settings Persistence Failure Warning on Import (#106)**:
+  - Enhanced `handleImportFile` in `BackupSection` to detect `settings_update_failed` warnings and render a visible notice indicating that subscription keys were imported but UI custom ordering / toggles failed to persist.
+- **Exact UTF-8 Passphrase Size Calculation in Export (#107)**:
+  - Replaced ASCII character length estimation with exact UTF-8 byte serialization `Buffer.byteLength(JSON.stringify({ passphrase: String(passphrase), backup }))`.
+  - Guaranteed symmetric size boundaries between export pre-check and import 8 MiB envelope enforcement for multi-byte Unicode passphrases.
+- **Complete Schema Field Translations and Label Fallback (#109)**:
+  - Added localized label keys for all 17 schema fields across English and Chinese dictionaries.
+  - Introduced `getFieldLabel` helper in `07-settings.js` that rejects `result === key` translation misses and gracefully falls back to human-readable `field.label`, ensuring 0 raw `prov_field_*` tokens are displayed.
+- **Decoupled Active Subscription History Recording (#115)**:
+  - Updated `FloatChip` to record the active subscription's own quota when active, and pool minimum under `null` otherwise.
+  - Eliminated false cross-account data points (e.g. A=90%, B=10%) in single-subscription burn-rate calculations.
+- **Documentation and Runtime Contract Alignment (#120)**:
+  - Clarified that Web UI settings card and profile configuration are the primary setup methods in modern DSH runtimes, framing `settings.yaml` as legacy migration.
+  - Synchronized `/health` endpoint documentation with same-origin / loopback protection and exact `{ ok, name, status }` response payload.
+  - Cleaned up lingering cooldown references in Russian documentation.
+- **Gitea Worktree Rules and Metric Matrix Alignment (#121)**:
+  - Synchronized `AGENTS.md` and `index.md` with version 0.2.24, 164+ test matrix, 8 MiB / 500 entries backup limits, and restored complete version history.
+
+## 0.2.24
+
+### Block 5: Audit Recheck Fixes (#97, #106, #107, #109, #115, #120, #121)
+- **Itemized Unresolved Credentials Warning on Export (#97)**:
+  - Extended export credential validation to verify `extraCredentialRef` alongside primary `credentialRef`.
+  - Emitted structured itemized warnings for any missing required credential fields (e.g. Ollama session cookies).
+  - Enhanced `BackupSection` in UI to display localized warning notices when an export contains unresolved entries.
+- **UI Settings Persistence Failure Warning on Import (#106)**:
+  - Enhanced `handleImportFile` in `BackupSection` to detect `settings_update_failed` warnings and render a visible notice indicating that subscription keys were imported but UI custom ordering / toggles failed to persist.
+- **Exact UTF-8 Passphrase Size Calculation in Export (#107)**:
+  - Replaced ASCII character length estimation with exact UTF-8 byte serialization `Buffer.byteLength(JSON.stringify({ passphrase: String(passphrase), backup }))`.
+  - Guaranteed symmetric size boundaries between export pre-check and import 8 MiB envelope enforcement for multi-byte Unicode passphrases.
+- **Complete Schema Field Translations and Label Fallback (#109)**:
+  - Added localized label keys for all 17 schema fields across English and Chinese dictionaries.
+  - Introduced `getFieldLabel` helper in `07-settings.js` that rejects `result === key` translation misses and gracefully falls back to human-readable `field.label`, ensuring 0 raw `prov_field_*` tokens are displayed.
+- **Decoupled Active Subscription History Recording (#115)**:
+  - Updated `FloatChip` to record the active subscription's own quota when active, and pool minimum under `null` otherwise.
+  - Eliminated false cross-account data points (e.g. A=90%, B=10%) in single-subscription burn-rate calculations.
+- **Documentation and Runtime Contract Alignment (#120)**:
+  - Clarified that Web UI settings card and profile configuration are the primary setup methods in modern DSH runtimes, framing `settings.yaml` as legacy migration.
+  - Synchronized `/health` endpoint documentation with same-origin / loopback protection and exact `{ ok, name, status }` response payload.
+  - Cleaned up lingering cooldown references in Russian documentation.
+- **Gitea Worktree Rules and Metric Matrix Alignment (#121)**:
+  - Synchronized `AGENTS.md` and `index.md` with version 0.2.24, 164+ test matrix, 8 MiB / 500 entries backup limits, and restored complete version history.
+
 ## 0.2.23
 
 ### Block 4: Canonical Tokens, Peer Dependencies, Health Security & Offline Hygiene (#119, #120, #121, #146, #147, #148)

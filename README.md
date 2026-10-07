@@ -179,10 +179,11 @@ dsh web --profile web
 
 ---
 
-## ⚙️ Configuration Reference (`settings.yaml`)
+## ⚙️ Configuration Reference
 
 ```yaml
-# ~/.dsh/profiles/web/settings.yaml
+# Primary configuration: Settings -> Plugins -> Key Limits, or profile plugin config.
+# Legacy import: ~/.dsh/profiles/web/settings.yaml
 plugins:
   '@goodandready/dsh-key-limits':
     storageDir: ~/.dsh/storages/dsh-key-limits
@@ -211,7 +212,7 @@ plugins:
 
 | Method & Path | Access / Origin | Description |
 |---------------|-----------------|-------------|
-| `GET /dsh-key-limits/health` | Public / Web | Service health check and subscription summary |
+| `GET /dsh-key-limits/health` | Loopback / Same-Origin | Service health check (`{ ok: true, name: "dsh-key-limits", status: "healthy" }`) |
 | `GET /dsh-key-limits/config` | Public / Web | Public UI configuration and provider input schemas |
 | `GET /dsh-key-limits/active-sub` | Public / Web | Active session subscription binding (`?sessionId=<id>`) |
 | `GET /dsh-key-limits/subs` | Public / Web | List of all configured subscriptions, cards, and balances |

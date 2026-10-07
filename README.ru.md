@@ -180,10 +180,11 @@ dsh web --profile web
 
 ---
 
-## ⚙️ Параметры конфигурации (`settings.yaml`)
+## ⚙️ Параметры конфигурации
 
 ```yaml
-# ~/.dsh/profiles/web/settings.yaml
+# Основная настройка: Настройки -> Плагины -> Key Limits (карточка настроек) или конфигурация профиля.
+# Миграция устаревших версий: ~/.dsh/profiles/web/settings.yaml
 plugins:
   '@goodandready/dsh-key-limits':
     storageDir: ~/.dsh/storages/dsh-key-limits
@@ -212,12 +213,12 @@ plugins:
 
 | Метод и путь | Доступ / Источник | Описание |
 |--------------|-------------------|----------|
-| `GET /dsh-key-limits/health` | Public / Web | Проверка работоспособности и сводка подписок |
+| `GET /dsh-key-limits/health` | Loopback / Same-Origin | Проверка работоспособности сервиса (`{ ok: true, name: "dsh-key-limits", status: "healthy" }`) |
 | `GET /dsh-key-limits/config` | Public / Web | Публичная конфигурация UI и схемы параметров провайдеров |
 | `GET /dsh-key-limits/active-sub` | Public / Web | Привязка подписки к активной сессии (`?sessionId=<id>`) |
 | `GET /dsh-key-limits/subs` | Public / Web | Список всех настроенных подписок, карточек и балансов |
 | `POST /dsh-key-limits/subs` | Loopback / Same-Origin | Добавление, изменение или удаление подписки |
-| `POST /dsh-key-limits/refresh-all` | Loopback / Same-Origin | Принудительное обновление всех подписок (cooldown 10с) |
+| `POST /dsh-key-limits/refresh-all` | Loopback / Same-Origin | Принудительное обновление всех подписок (защита от одновременного выполнения / in-flight lock) |
 | `POST /dsh-key-limits/export` | Loopback / Same-Origin | Экспорт зашифрованного паролем бэкапа подписок (AES-256-GCM) |
 | `POST /dsh-key-limits/import` | Loopback / Same-Origin | Дешифрование и импорт бэкапа с дедупликацией |
 | `GET /dsh-key-limits/update` | Loopback / Same-Origin | Проверка наличия новых версий плагина в npm |

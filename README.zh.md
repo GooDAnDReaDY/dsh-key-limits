@@ -181,10 +181,11 @@ dsh web --profile web
 
 ---
 
-## ⚙️ 配置参数指南 (`settings.yaml`)
+## ⚙️ 配置参数指南
 
 ```yaml
-# ~/.dsh/profiles/web/settings.yaml
+# 主要配置途径: 设置 -> 插件 -> Key Limits 设置卡片，或 profile 插件配置。
+# 早期版本兼容导入: ~/.dsh/profiles/web/settings.yaml
 plugins:
   '@goodandready/dsh-key-limits':
     storageDir: ~/.dsh/storages/dsh-key-limits
@@ -213,7 +214,7 @@ plugins:
 
 | 方法与路径 | 访问权限 / 来源 | 说明 |
 |------------|-----------------|------|
-| `GET /dsh-key-limits/health` | 公开 / Web | 插件健康检查与订阅摘要 |
+| `GET /dsh-key-limits/health` | 回环 / 同源 | 插件健康检查 (`{ ok: true, name: "dsh-key-limits", status: "healthy" }`) |
 | `GET /dsh-key-limits/config` | 公开 / Web | 公开 UI 配置与服务商字段架构 |
 | `GET /dsh-key-limits/active-sub` | 公开 / Web | 获取当前会话绑定的订阅信息 (`?sessionId=<id>`) |
 | `GET /dsh-key-limits/subs` | 公开 / Web | 获取所有已配置订阅、卡片与余额 |
