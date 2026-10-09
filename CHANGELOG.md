@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.26
+
+### DSH Desktop Electron Referer Support (#152)
+- **Non-HTTP Referer Loopback Passthrough (#152)**:
+  - Fixed issue where DSH Desktop Electron stripped `Origin` and `Sec-Fetch-Site` headers while preserving `Referer: dsh-app://app/`, causing `isTrustedSettingsRequest` in `lib/http-utils.js` to reject all incoming requests (`/config`, `/active-sub`, `/subs`, `/refresh-all`, `/export`, `/import`) with HTTP 403 Forbidden.
+  - Restricted strict `u.host === expectedHost` referer checks to `http:` and `https:` schemes only.
+  - Added loopback remote verification (`isLoopback`) for custom scheme referers (e.g. `dsh-app://`), allowing legitimate DSH Desktop calls to reach plugin endpoints while maintaining strict CSRF defense against remote callers.
+  - Preserved fail-closed defenses for missing source headers without socket and rejected cross-site requests.
+  - Exported `isLoopback` utility and added comprehensive unit and route integration tests.
+
 ## 0.2.25
 
 ### Block 6: Audit Follow-up Fixes (#115, #120, #121)
