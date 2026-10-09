@@ -199,7 +199,7 @@ plugins:
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `storageDir` | `string` | `~/.dsh/storages/dsh-key-limits` | Directory where subscription metadata and cached cards are stored (read-only in UI, configured in settings.yaml, requires restart). |
+| `storageDir` | `string` | `~/.dsh/storages/dsh-key-limits` | Directory where subscription metadata and cached cards are stored (read-only in UI, configured via profile plugin configuration, requires restart). |
 | `refreshHours` | `number` | `24` | Background polling interval in hours for refreshing quota windows from providers. |
 | `ui.floatChip` | `boolean` | `true` | Show floating draggable indicator chip in the viewport. |
 | `ui.composerBar` | `boolean` | `true` | Show active key button in the chat composer bar. |

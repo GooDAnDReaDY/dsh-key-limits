@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.25
+
+### Block 6: Audit Follow-up Fixes (#115, #120, #121)
+- **Burn-Rate Series Isolation and SubId Preservation (#115)**:
+  - Updated `recordUsageSnapshot` in `03-format.js` to compare both `bucketTime` and `lastSid === sid` before updating bucket, ensuring that transitioning from active account to pool does not overwrite active account snapshots with pool values.
+  - Refactored `calcBurnRate` to strictly filter points by `targetSubId` without `!p.subId` wildcard, completely eliminating cross-series contamination (e.g. pool minimum mixed into account A's series).
+- **StorageDir Locale and Documentation Alignment (#120)**:
+  - Replaced outdated `settings.yaml` notes on `storageDir` disabled input in `02-locale.js` (`storageDirRestartNote`) with modern profile plugin configuration notes in EN and ZH.
+  - Aligned parameter table in `README.md` to reference profile plugin configuration.
+- **Index, AGENTS, and Mirror Metric Synchronization (#121)**:
+  - Synchronized `index.md` header, status, and test counts to release 0.2.25.
+  - Removed stale duplicate version lines in `index.md` history table.
+  - Aligned healthcheck smoke commands in `index.md` and `AGENTS.md` with Loopback / Same-Origin guard (`-H "Host: 127.0.0.1:3080" -H "Origin: http://127.0.0.1:3080"`).
+  - Aligned GitHub mirror check metric to 22 product files.
+
 ## 0.2.24
 
 ### Block 5: Audit Recheck Fixes (#97, #106, #107, #109, #115, #120, #121)
