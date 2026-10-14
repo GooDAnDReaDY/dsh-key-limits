@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.2.27
+
+### Security Hardening and Audit Fixes (#155)
+- **Trusted Network Boundaries and Internal Auth Validation (#155)**:
+  - Enforced loopback and private LAN boundary (`isTrustedAddress`) on both `remote` address and `rawHost` in `lib/http-utils.js`.
+  - Prohibited accepting `x-dsh-internal-auth` from untrusted WAN remote addresses or invalid hosts, eliminating spoofing and DNS rebinding risks on sensitive endpoints (`/subs`, `/export`, `/import`).
+- **Scrypt KDF Hardening and Passphrase Length (#155)**:
+  - Increased `scrypt` iteration cost from `N=16384` to `N=131072` (with `maxmem=256MB`) for backup package encryption in `lib/crypto-backup.js`.
+  - Maintained backward compatibility for decrypting legacy backup archives using `backupPackage.kdfParams.N` with fallback to `16384`.
+  - Raised minimum passphrase length from 4 to 8 characters in backend validator, export/import routes, and client modal.
+- **Service Event Hygiene and Updater Cleanup (#155)**:
+  - Removed dead `ctx.on('config')` in `lib/index.js` and separated `loader/volatile-update` handling from `settings/document-updated` namespace filtering.
+  - Removed redundant `--config.minimumReleaseAge=0` flag from `lib/plugin-updater.js`.
+
 ## 0.2.26
 
 ### DSH Desktop Electron Referer Support (#152)
