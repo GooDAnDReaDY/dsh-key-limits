@@ -1,3 +1,21 @@
+## 0.2.33
+
+### Ambient 24h Quota Sparklines (#163) & Multi-Currency Normalization (#164)
+
+#### 1. Ambient 24-Hour Quota Utilization Sparkline Charts (#163)
+- Compact, lightweight inline SVG micro-charts (< 50 lines JS, render < 0.1ms) rendered inside every subscription card in `AllLimitsModal`.
+- Visualizes 24-hour quota and balance utilization dynamics without external chart libraries (Chart.js / D3).
+- Uses DSH native theme variables with state-aware colors and area fill gradients.
+- Gracefully handles 0 points (dashed subtle baseline), 1 point (horizontal level line + dot), and 2+ points (area and polyline with latest value circle and accessible tooltip).
+- Per-subscription series tracking via non-duplicating 10-minute snapshot buckets.
+
+#### 2. Multi-Currency Normalization with Per-Provider Currency Selector (#164)
+- Added user configurable display currency per provider: `auto` (provider default: USD for OpenRouter, CNY for DeepSeek), `USD`, `CNY`, `RUB`, `EUR`.
+- Interactive `EditSubModal` enables editing account labels and display currency without re-entering secrets.
+- Instant converted balance display with original breakdown subtext (e.g. `~520 ₽ (orig: $5.35 at 97.2)`).
+- Header summary bar aggregates total financial balance across all deposit providers normalized to base USD.
+- Background exchange rate manager (`lib/currency.js`) caches live rates with seamless offline fallback to static defaults.
+
 # Changelog
 
 ## 0.2.32
