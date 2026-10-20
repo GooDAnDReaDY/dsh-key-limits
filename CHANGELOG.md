@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.30
+
+- Pre-emptive key switch co-op integration with `dsh-key-rotation` via Cordis event `key-limits/threshold-reached` and dedicated settings UI with GitHub companion repo link (#159).
+- Quota replenishment desktop & Web Notifications when previously exhausted keys recover balance/quota (#160).
+- Extended test suite covering rotation events, replenishment alerts, and strict Zero-Cyrillic enforcement across source code (184 passing tests).
+
 ## 0.2.29
 
 ### Composer Pre-Flight Guard (#157) & Expanded Provider Catalog (#158)
