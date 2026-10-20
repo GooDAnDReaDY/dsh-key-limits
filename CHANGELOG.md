@@ -1,3 +1,17 @@
+## 0.2.34
+
+### Bento Hub UI Enhancements: Status Filters, Sorting, and Critical Badge (#165)
+
+- **Quick Status Filter Tabs**: Added filter tabs in `AllLimitsModal`: `All`, `Attention <20%` (quota <= 20% or balance <= 20% or revoked), `Exhausted 0%` (quota <= 0% or balance <= 0 or revoked), `Quotas`, and `Balances`.
+- **Dynamic In-Memory Sorting**: Multi-mode sorting selector dropdown:
+  - `Default Order`: preserves custom pinned and active-on-top order.
+  - `Min Quota First`: sorts lowest remaining quota percentage first.
+  - `Reset Soonest`: sorts accounts with earliest reset timestamp first.
+  - `Provider Alphabetical`: alphabetical sorting by provider name.
+- **Critical Attention Badge**: High-visibility pill badge in the modal header when warning accounts exist (`⚠️ {count} require attention`), clicking it switches directly to the `Attention <20%` tab.
+- **Session State Persistence**: Remembers active tab (`kl-hub-tab`) and sorting preference (`kl-hub-sort`) across modal opens using resilient `sessionStorage` with safe fallback.
+- **Zero Cyrillic Policy**: Strict zero-Cyrillic enforcement across all client `.js` source files and client bundles.
+
 ## 0.2.33
 
 ### Ambient 24h Quota Sparklines (#163) & Multi-Currency Normalization (#164)
