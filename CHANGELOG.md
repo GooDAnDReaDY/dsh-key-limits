@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.2.29
+
+### Composer Pre-Flight Guard (#157) & Expanded Provider Catalog (#158)
+- **Pre-Flight Guard in Composer Bar (#157)**:
+  - Added real-time quota exhaustion detection in composer bar slot (`ActiveKeyButton`).
+  - Pulsing danger state (`kl-chip kl-exhausted`) with prominent warning badge (`kl-guard-badge`) showing reset countdown timer (e.g. `Exhausted · 18m`).
+  - Added soft keyboard interceptor: regular Enter keypress is intercepted when active provider quota is exhausted, displaying the modal to switch keys or check limits; Shift+Enter soft bypass allows intentional force sending.
+  - Added `ui.composerGuard` configuration toggle (defaults to `true`).
+- **Expanded Provider Catalog (#158)**:
+  - Added official support for 5 new providers:
+    - **xAI (Grok)**: official API key validation via `https://api.x.ai/v1/api-key`.
+    - **Mistral AI**: rate limits and request quota tracking via `https://api.mistral.ai/v1/models`.
+    - **Cerebras**: daily request and minute token quota windows via `https://api.cerebras.ai/v1/models`.
+    - **Together AI**: balance and model availability via `https://api.together.xyz/v1/models`.
+    - **Custom BaseURL**: arbitrary OpenAI-compatible endpoint with user-defined Base URL and optional Bearer token.
+  - Updated provider schemas and bilingual localization (EN/ZH) in `src/client/02-locale.js`.
+  - Added comprehensive parser and fetcher unit tests with mock fixtures.
+
 ## 0.2.28
 
 ### Security Fix: Enforce DSH Session Authentication Across Plugin Endpoints (#166)
