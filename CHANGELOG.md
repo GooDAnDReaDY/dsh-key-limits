@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.31
+## 0.2.32
 
 - Interactive one-click key switcher popover in composer bar with provider-specific key list and live status indicators (#161).
 - Dynamic key switching endpoint `POST /dsh-key-limits/active-sub` with `sessionTracker.setActiveSub` support (#161).
