@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.31
+
+- Interactive one-click key switcher popover in composer bar with provider-specific key list and live status indicators (#161).
+- Dynamic key switching endpoint `POST /dsh-key-limits/active-sub` with `sessionTracker.setActiveSub` support (#161).
+- Provider latency measurement (RTT ping in ms) and invalid/revoked key diagnostics (HTTP 401/403) with visual status beacons in cards (#162).
+- Extended test suite covering switcher, latency tracking, and revocation diagnostics (189 passing tests).
+
 ## 0.2.30
 
 - Pre-emptive key switch co-op integration with `dsh-key-rotation` via Cordis event `key-limits/threshold-reached` and dedicated settings UI with GitHub companion repo link (#159).
