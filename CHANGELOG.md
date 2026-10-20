@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.28
+
+### Security Fix: Enforce DSH Session Authentication Across Plugin Endpoints (#166)
+- **Session Authentication Barrier via DSH Connection Service (#166)**:
+  - Eliminated critical vulnerability where unauthenticated LAN callers could trigger `/export` with an arbitrary passphrase to dump decrypted provider credentials and secrets.
+  - Implemented `authorizeSettingsRequest(ctx, req, res, options)` utilizing canonical DSH `connection.requestRejection(req)` session admission.
+  - Unauthenticated remote LAN callers without valid browser session cookies receive HTTP 401 Unauthorized; untrusted Host/Origin headers receive HTTP 403 Forbidden.
+  - Fail-closed fallback prevents unauthenticated access if the connection service is absent.
+  - Preserved unauthenticated loopback GET `/health` smoke probes for local monitoring and health checks.
+  - Protected all plugin endpoints: `/health`, `/config`, `/active-sub`, `/subs`, `/refresh-all`, `/export`, and `/import`.
+
 ## 0.2.27
 
 ### Security Hardening and Audit Fixes (#155)
