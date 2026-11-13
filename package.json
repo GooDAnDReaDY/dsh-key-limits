@@ -1,6 +1,6 @@
 {
   "name": "@goodandready/dsh-key-limits",
-  "version": "0.2.34",
+  "version": "0.2.35",
   "description": "DeepSeek Harness plugin: API key / subscription quota limits (float chip, composer bar, settings).",
   "type": "module",
   "main": "lib/index.js",
@@ -67,7 +67,8 @@
   "scripts": {
     "build:client": "node scripts/build-client.mjs",
     "test": "node --import ./test/offline-guard.mjs --test",
-    "prepublishOnly": "npm run build:client && node --import ./test/offline-guard.mjs --test"
+    "prepublishOnly": "npm run audit && npm run build:client && node --import ./test/offline-guard.mjs --test",
+    "audit": "npm audit --omit=dev"
   },
   "peerDependenciesMeta": {
     "@deepseek-ai/dsh-credentials": {
@@ -76,5 +77,6 @@
     "@deepseek-ai/dsh-session": {
       "optional": true
     }
-  }
+  },
+  "packageManager": "npm@12.0.1"
 }

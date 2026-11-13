@@ -1,3 +1,23 @@
+## 0.2.35
+
+### Lockfile, Prepublish Audit, Deploy Script, and Code Hygiene (#173, #174)
+
+- **Lockfile & Dependency Vulnerability Audit (#173)**:
+  - Added `packageManager: "npm@12.0.1"` to `package.json`.
+  - Generated and committed canonical `package-lock.json` in git repository.
+  - Added `audit` script (`npm audit --omit=dev`) and integrated audit gate into `prepublishOnly` lifecycle.
+  - Verified `0 vulnerabilities` across all production dependencies.
+
+- **Canonical Deployment Script (#174)**:
+  - Implemented executable `deploy.sh` (mode 0755) with pre-deploy quality gates: unit tests, dependency audit, 4-site identity check, and package composition check.
+  - Added automated `--install` routine installing to `$DSH_PROFILE` (`web`), restarting `dsh-web.service`, and verifying `/dsh-key-limits/health` with origin check.
+
+- **Catch Block Hardening & Module Size Rationalization (#174)**:
+  - Eliminated silent catch in `lib/currency.js` by replacing with debug-logged best-effort error handling.
+  - Documented best-effort intention in `src/client/04-modals.js` `sessionStorage` calls.
+  - Optimized and formatted `lib/subs.js` (down to 596 lines) and `lib/provider-fetchers.js` (down to 598 lines), bringing all host JavaScript modules strictly under the 600-line threshold.
+  - Recorded module boundaries and size rationales in `docs/design/DESIGN.md`.
+
 ## 0.2.34
 
 ### Bento Hub UI Enhancements: Status Filters, Sorting, and Critical Badge (#165)
